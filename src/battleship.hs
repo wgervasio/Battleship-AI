@@ -77,7 +77,7 @@ checkSunk :: Boat -> Bool
 checkSunk Boat positions sunk = Foldr (||) sunk False
 
 checkBounds :: (Integer, Integer) -> Bool
-checkBounds (x, y) = (x >= 0 && x <= 10) && (y >= 0 && y <= 10)
+checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 
 checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
@@ -86,21 +86,32 @@ checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - 
 placeBoat :: Integer -> [Boat] -> [Boat]
 placeBoat n lst = do
    -- we need to add checks for overlapping boats here 
+   putStrLn("you are now placing your boat of size " ++ n ".")
    putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
    dir <- getLine
    let maincoord = if dir == "H" then "x" else "y"
    let secondcoord = if dir == "H" then "y" else "x"
-   putStrLn "What should the first " ++ maincoord ++ " value of your boat be?"
-   val1 <- read getLine :: Integer
-   putStrLn "What should the second " ++ maincoord ++ " value of your boat be?"
-   val2 <- read getLine :: Integer
-   putStrLn "What should the " ++ secondcoord ++ " value of your boat be?"
-   val3 <- read getLine :: Integer
-   if dir == "H" then   
-      (Boat [(i, val3) | i <- [val1..val2]] [i > 999 | i <- [val1..val2]]):lst
-   else
-      (Boat [(val3, i) | i <- [val1..val2]] [i > 999 | i <- [val1..val2]]):lst
+   if dir =="H" then
+      putStrLn "What row is your boat on?"
+      val0 <- read getLine :: Integer
+      putStrLn "What column do you want the head of your boat to be at?"
+      val1 <- read getLine :: Integer
+      putStrLn "What column do you want the tail of your boat to be at?"
+      val2 <- read getLine :: Integer
+      (Boat [(i, val0) | i <- [(min(val1, val2))..(max(val1,val2))] [ False | i <- [(min(val1, val2))..(max(val1,val2))]]):lst
+   else 
+      putStrLn "What column is your boat on?"
+      val0 <- read getLine :: Integer
+      putStrLn "What row do you want the head of your boat to be at?"
+      val1 <- read getLine :: Integer
+      putStrLn "What row do you want the tail of of your boat to be at?"
+      val2 <- read getLine :: Integer
+      (Boat [(val0, i) | i <- [(min(val1, val2))..(max(val1,val2))] [ False | i <- [(min(val1, val2))..(max(val1,val2))]]):lst
    
+   -- placeBoatRandom :: Integer -> [Boat]
+   placeBoatRandom n [] = 
+   
+<<<<<<< Updated upstream
 -- TODO: implement placeBoatRandom
 -- placeBoatRandom :: [Boat]
 placeBoatRandom = putStrLn "Not implemented yet"
@@ -108,6 +119,20 @@ placeBoatRandom = putStrLn "Not implemented yet"
 -- TODO: implement printBoard
 -- printBoard :: IO [Char]
 printBoard a b = putStrLn "Not implemented yet"
+
+=======
+      -- random orientation
+      pos = (randomR(1,2))
+      if pos `mod` 2 == 0 then
+         pos == "H"
+      else
+         pos == "V"
+
+
+      -- random position
+      coords = (randomR(1, 10), randomR(1,10))
+>>>>>>> Stashed changes
+
 
 
 
