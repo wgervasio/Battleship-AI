@@ -26,7 +26,7 @@ startGame=do
    placeBoat(3, playerList)
    placeBoat(2, playerList)
    let enemyList = placeBoatRandom()
-   playGame(playerList, enemyList, makePlayerBoard(playerList), makeBoard)
+   playGame(playerList, enemyList, createPlayerBoard(playerList), makeBoard)
 
 
 
@@ -89,7 +89,13 @@ placeBoat n lst = do
    else
       (Boat [(val3, i) | i <- [val1..val2]] [i > 999 | i <- [val1..val2]]):lst
    
+   -- TODO: implement placeBoatRandom
+   placeBoatRandom :: [Boat]
+   placeBoatRandom = Nothing
 
+   -- TODO: implement printBoard
+   printBoard :: IO [Char]
+   printBoard = Nothing
 
 
 
