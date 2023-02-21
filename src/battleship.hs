@@ -68,7 +68,7 @@ checkBounds :: (Integer, Integer) -> Bool
 checkBounds (x, y) = (x >= 0 && x <= 10) && (y >= 0 && y <= 10)
 
 checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
-checkAligned (x,y) (w,z) num = if (x != w) && (y != z) then false else (abs(x - w) == num) || (abs(y -z ) == num)
+checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 
 placeBoat :: Integer -> [Boat] -> [Boat]
