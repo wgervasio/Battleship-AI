@@ -18,36 +18,48 @@ import Shot
 import Setup
 import System.Random
 
+
+startGame :: IO [Boat]
+-- places all 5 boats on the board
+-- places the enemy boats randomly
+-- plays the first turn for the player
 startGame=do
+   let enemyList = placeBoatRandom()
    let playerList = []
    placeBoat(5, playerList)
    placeBoat(4, playerList)
    placeBoat(3, playerList)
    placeBoat(3, playerList)
    placeBoat(2, playerList)
-   let enemyList = placeBoatRandom()
-   playGame(playerList, enemyList, createPlayerBoard(playerList), makeBoard)
+   -- place your 5 boats
+   
+   playerTurn(playerList, enemyList, createBoard(playerList), createBoard(enemyList))
+   -- call player turn
 
 
 
-
-playGame :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
-playGame plist elist pboard eboard = do
+playerTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
+-- prompts user for shot
+-- checks if shot is valid
+-- checks if shot hits a boat
+-- checks if all enemy boats are sunk
+playerTurn plist elist pboard eboard = do
    printBoard(pboard, eboard)
-   putStrLn "What row do you want to fire at?"
-   x <- read getLine :: Integer
-   putStrLn "What column do you want to fire at?"
-   y <- read getLine :: Integer
+
+
+   (x,y) <- promptShot()
+
+
    checkShot((x,y), enemyBoard, enemyList)
-   if gameWon playerList then
+   if gameWon plist then
       putStrLn "You won!"
       True
    else
-      playGameEnemy(plist elist pboard eboard)
+      enemyTurn(plist elist pboard eboard)
 
 
-playGameEnemy :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
-playGameEnemy plist elist pboard eboard = do
+enemyTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
+enemyTurn plist elist pboard eboard = do
    printBoard(pboard, eboard)
    let shot = (randomR(1, 10), randomR(1,10))
    putStrLn "The enemy shoots at row " ++ show fst randomShot ++ ", column " ++ show snd randomShot
@@ -56,7 +68,7 @@ playGameEnemy plist elist pboard eboard = do
       putStrLn "Enemy won!"
       False
    else
-      playGame(plist elist pboard eboard)
+      playerTurn(plist elist pboard eboard)
 
 gameWon :: [Boat] -> Bool
 gameWon lst = foldr (\x y -> checkSunk x && y ) lst True

@@ -4,5 +4,5 @@ module Setup where
 
     createBoard = [['a']]
 
-    createPlayerBoard :: [Boat] -> Board
-    createPlayerBoard lst = Board [['a']]
+    createBoard :: [Boat] -> Board
+    createBoard lst = Board [['a']]
