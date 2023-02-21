@@ -23,5 +23,11 @@ module Shot where
             promptShot
 
 
-
-    randomShot = (0,0)
+    randomShot :: (Integer, Integer)
+    randomShot = do
+        coords <- (randomRIO(1, 10), randomRIO(1, 10))
+        if checkBounds coords then
+            return coords
+        else
+            -- silently try again
+            randomShot

@@ -44,24 +44,32 @@ playerTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
 -- checks if shot hits a boat
 -- checks if all enemy boats are sunk
 playerTurn plist elist pboard eboard = do
+   -- print enemy board
+   -- TODO change this
    printBoard(pboard, eboard)
 
 
    (x,y) <- promptShot()
-
-
    checkShot((x,y), enemyBoard, enemyList)
-   if gameWon plist then
+
+   -- print enemy board after shot
+   -- TODO change this
+   printBoard(pboard,eboard)
+
+   if gameWon elist then
       putStrLn "You won!"
-      True
    else
       enemyTurn(plist elist pboard eboard)
 
 
 enemyTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
 enemyTurn plist elist pboard eboard = do
+   -- print player board
+   -- TODO: fix this
    printBoard(pboard, eboard)
+
    let shot = (randomR(1, 10), randomR(1,10))
+   
    putStrLn "The enemy shoots at row " ++ show fst randomShot ++ ", column " ++ show snd randomShot
    checkShot(shot, enemyBoard, enemyList)
    if gameWon playerList then
@@ -111,16 +119,6 @@ placeBoat n lst = do
    -- placeBoatRandom :: Integer -> [Boat]
    placeBoatRandom n [] = 
    
-<<<<<<< Updated upstream
--- TODO: implement placeBoatRandom
--- placeBoatRandom :: [Boat]
-placeBoatRandom = putStrLn "Not implemented yet"
-
--- TODO: implement printBoard
--- printBoard :: IO [Char]
-printBoard a b = putStrLn "Not implemented yet"
-
-=======
       -- random orientation
       pos = (randomR(1,2))
       if pos `mod` 2 == 0 then
@@ -131,7 +129,6 @@ printBoard a b = putStrLn "Not implemented yet"
 
       -- random position
       coords = (randomR(1, 10), randomR(1,10))
->>>>>>> Stashed changes
 
 
 
