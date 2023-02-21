@@ -24,6 +24,9 @@ module Shot where
 
 
     randomShot :: (Integer, Integer)
+    -- randomly generates a shot
+    -- checks if shot is valid
+    -- returns shot coordinates, otherwise tries again
     randomShot = do
         coords <- (randomRIO(1, 10), randomRIO(1, 10))
         if checkBounds coords then
