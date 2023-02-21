@@ -89,13 +89,16 @@ placeBoat n lst = do
    else
       (Boat [(val3, i) | i <- [val1..val2]] [i > 999 | i <- [val1..val2]]):lst
    
-   -- TODO: implement placeBoatRandom
-   placeBoatRandom :: [Boat]
-   placeBoatRandom = Nothing
+-- TODO: implement placeBoatRandom
+-- placeBoatRandom :: [Boat]
+placeBoatRandom = putStrLn "Not implemented yet"
 
-   -- TODO: implement printBoard
-   printBoard :: IO [Char]
-   printBoard = Nothing
+-- TODO: implement printBoard
+-- printBoard :: IO [Char]
+printBoard a b = putStrLn "Not implemented yet"
+
+
+
 
 
 
