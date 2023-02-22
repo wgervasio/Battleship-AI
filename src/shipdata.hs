@@ -39,3 +39,9 @@ module ShipData where
     checkBounds :: (Integer, Integer) -> Bool
     checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 
+
+    printBoard :: Board -> IO ()
+    printBoard (Board board) = do
+        putStrLn "  1 2 3 4 5 6 7 8 9 10"
+        putStrLn "  -------------------"
+
