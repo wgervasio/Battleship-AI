@@ -55,22 +55,22 @@ module Shot where
         x <- getLine
         putStrLn "What row do you want to fire at?"
         y <- getLine
-        coords <- (,) <$> read::Integer x <*> read::Integer y
-        if checkBounds coords
-            then return coords
+        coords <- (,) <$> readIO x <*> readIO y
+        if checkBounds coords then
+            return coords
             else do
                 putStrLn "Invalid coordinates. Try again."
                 promptShot
 
 
-    randomShot :: (Integer, Integer)
+    randomShot :: IO (Integer, Integer)
     -- randomly generates a shot
     -- checks if shot is valid
     -- returns shot coordinates, otherwise tries again
     randomShot = do
         coords <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
         if checkBounds coords then
-            coords
+            return coords
         else
             -- silently try again
             randomShot
