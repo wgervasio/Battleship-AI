@@ -24,7 +24,13 @@ startGame :: IO [Boat]
 -- places the enemy boats randomly
 -- plays the first turn for the player
 startGame=do
-   let enemyList = placeBoatRandom()
+   let enemyList = []
+   placeBoatRandom(5, playerList)
+   placeBoatRandom(4, playerList)
+   placeBoatRandom(3, playerList)
+   placeBoatRandom(3, playerList)
+   placeBoatRandom(2, playerList)
+
    let playerList = []
    placeBoat(5, playerList)
    placeBoat(4, playerList)
@@ -122,19 +128,39 @@ placeBoat n lst = do
       val2 <- read getLine :: Integer
       (Boat [(val0, i) | i <- [(min(val1, val2))..(max(val1,val2))] [ False | i <- [(min(val1, val2))..(max(val1,val2))]]):lst
    
-   -- placeBoatRandom :: Integer -> [Boat]
-   placeBoatRandom n [] = 
-   
-      -- random orientation
-      pos = (randomR(1,2))
-      if pos `mod` 2 == 0 then
-         pos == "H"
-      else
-         pos == "V"
+placeBoatRandom :: Int -> [Boat] -> IO [Boat]
+placeBoatRandom n lst = do
+  -- random orientation/direction
+  dir <- randomRIO (1, 2)
+  let dirStr = if dir `mod` 2 == 0 then "H" else "V"
 
+  -- random pointing
+  pointing <- randomRIO (1, 2)
+  let pointingStr = if pointing `mod` 2 == 0 then "L" else "R"
 
-      -- random position
-      coords = (randomR(1, 10), randomR(1,10))
+  let loop = do
+      start_x <- randomRIO (1, 10)
+      start_y <- randomRIO (1, 10)
+      let (end_x, end_y, coords) = if dir == "H" then
+         if pointing == "L" then
+            let ex = start_x + n in (ex, start_y, [(i, start_y) | i <- [(min(start_x, ex))..(max(start_x, ex))]])
+         else
+            let ex = start_x - n in (ex, start_y, [(i, start_y) | i <- [(min(start_x, ex))..(max(start_x, ex))]])
+         else
+            if pointing == "U" then
+               let ey = start_y + n in (start_x, ey, [(start_x, i) | i <- [(min(start_y, ey))..(max(start_y, ey))]])
+            else
+               let ey = start_y - n in (start_x, ey, [(start_x, i) | i <- [(min(start_y, ey))..(max(start_y, ey))]])
+      let not_valid = not $ all checkBounds coords
+      if not_valid then
+         loop
+      else 
+         let newBoat = if dirStr == "H" then
+            (Boat [(val0, i) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] [ False | i <- [(min(start_x, end_x))..(max(start_x, end_x))]]):lst
+         else
+            (Boat [(i, val0) | i <- [(min(start_y, end_y))..(max(start_y, end_y))]] [ False | i <- [(min(start_y, end_y))..(max(start_y, end_y))]])):lst
+         in return (newBoat:lst)
+   loop
 
 
 
