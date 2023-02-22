@@ -99,8 +99,13 @@ checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
-checkOverlaps :: [Boat] -> Bool
--- TODO: implement this
+-- check if two boats are overlapped
+checkOverlaps :: Boat -> Boat -> Bool
+checkOverlaps b1 b2 =
+   any b1coords `elem` boat2coords
+   where
+      boat1coords = b1 (h:t)
+      boat2coords = b2 (h:t)
 
 
 placeBoat :: Integer -> [Boat] -> IO [Boat]
