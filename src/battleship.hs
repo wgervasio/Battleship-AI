@@ -50,36 +50,38 @@ playerTurn plist elist pboard eboard = do
 
 
    (x,y) <- promptShot()
-   checkShot((x,y), enemyBoard, enemyList)
+   (elist-new, eboard-new)<- checkShot((x,y), elist, eboard)
 
    -- print enemy board after shot
    -- TODO change this
-   printBoard(pboard,eboard)
+   printBoard(eboard-new)
 
-   if gameWon elist then
+   if gameWon elist-new then
       putStrLn "You won!"
    else
-      enemyTurn(plist elist pboard eboard)
+      enemyTurn(plist elist-new pboard eboard-new)
 
 
 enemyTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
 enemyTurn plist elist pboard eboard = do
    -- print player board
    -- TODO: fix this
-   printBoard(pboard, eboard)
+   printBoard(pboard)
 
-   let shot = (randomR(1, 10), randomR(1,10))
-   
-   putStrLn "The enemy shoots at row " ++ show fst randomShot ++ ", column " ++ show snd randomShot
-   checkShot(shot, enemyBoard, enemyList)
-   if gameWon playerList then
+   (x,y) <- randomShot()
+
+   putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
+   (plist-new, pboard-new) <- checkShot((x,y), plist, pboard)
+   if gameWon plist-new then
       putStrLn "Enemy won!"
-      False
    else
-      playerTurn(plist elist pboard eboard)
+      playerTurn(plist-new elist pboard-new eboard)
+
+
 
 gameWon :: [Boat] -> Bool
-gameWon lst = foldr (\x y -> checkSunk x && y ) lst True
+-- checks if all boats are sunk in lst
+gameWon lst = and (map checkSunk lst)
 
 checkSunk :: Boat -> Bool
 checkSunk Boat positions sunk = Foldr (||) sunk False
