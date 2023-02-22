@@ -84,7 +84,11 @@ gameWon :: [Boat] -> Bool
 gameWon lst = and (map checkSunk lst)
 
 checkSunk :: Boat -> Bool
-checkSunk Boat positions sunk = Foldr (||) sunk False
+-- checks if a boat is sunk
+checkSunk (Boat _ lst) = and lst
+
+
+
 
 checkBounds :: (Integer, Integer) -> Bool
 checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
