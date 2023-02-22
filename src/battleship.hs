@@ -89,12 +89,6 @@ gameWon :: [Boat] -> Bool
 -- checks if all boats are sunk in lst
 gameWon lst = and (map checkSunk lst)
 
-checkSunk :: Boat -> Bool
--- checks if a boat is sunk
-checkSunk (Boat _ lst) = and lst
-
-checkBounds :: (Integer, Integer) -> Bool
-checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 
 checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)

@@ -32,4 +32,12 @@ module ShipData where
         updateBoardElements boardNew (positions boat) 'B')
          emptyBoard
           boats
+    
+    
+    checkSunk :: Boat -> Bool
+    -- checks if a boat is sunk
+    checkSunk (Boat _ lst) = and lst
+
+    checkBounds :: (Integer, Integer) -> Bool
+    checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 

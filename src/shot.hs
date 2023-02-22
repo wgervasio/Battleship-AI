@@ -1,5 +1,7 @@
 module Shot where
-    import ShipData ( Board(..), Boat(..) )
+    import ShipData ( updateBoardElement, Board, Boat(Boat) )
+    import System.Random ( randomRIO )
+    import ShipData (checkBounds)
     
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
     -- checks if shot hit any boats
@@ -52,12 +54,12 @@ module Shot where
         x <- getLine
         putStrLn "What row do you want to fire at?"
         y <- getLine
-        coords <- ((read x :: Integer), (read y :: Integer))
-        if checkBounds coords then
-            return coords
-        else
-            putStrLn "Invalid coordinates. Try again."
-            promptShot
+        coords <- (,) <$> read x <*> read y
+        if checkBounds coords
+            then return coords
+            else do
+                putStrLn "Invalid coordinates. Try again."
+                promptShot
 
 
     randomShot :: (Integer, Integer)
@@ -65,9 +67,9 @@ module Shot where
     -- checks if shot is valid
     -- returns shot coordinates, otherwise tries again
     randomShot = do
-        coords <- (randomRIO(1, 10), randomRIO(1, 10))
+        coords <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
         if checkBounds coords then
-            return coords
+            coords
         else
             -- silently try again
             randomShot
