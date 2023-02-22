@@ -56,16 +56,16 @@ playerTurn plist elist pboard eboard = do
 
 
    (x,y) <- promptShot()
-   (elist-new, eboard-new) <- checkShot((x,y), elist, eboard)
+   let (newElist, newEboard) = checkShot((x,y), elist, eboard)
 
    -- print enemy board after shot
    -- TODO change this
-   printBoard(eboard-new)
+   printBoard(newEboard)
 
    if gameWon elist-new then
       putStrLn "You won!"
    else
-      enemyTurn(plist elist-new pboard eboard-new)
+      enemyTurn(plist newElist pboard newEboard)
 
 
 enemyTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
@@ -77,11 +77,11 @@ enemyTurn plist elist pboard eboard = do
    (x,y) <- randomShot()
 
    putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   (plist-new, pboard-new) <- checkShot((x,y), plist, pboard)
+   (newPlist, newPboard) <- checkShot((x,y), plist, pboard)
    if gameWon plist-new then
       putStrLn "Enemy won!"
    else
-      playerTurn(plist-new elist pboard-new eboard)
+      playerTurn(newPlist elist newPboard eboard)
 
 
 
