@@ -11,9 +11,7 @@ module ShipData where
     
     data Board = Board (Array (Integer,Integer) Char)
         deriving (Show)
-    instance Eq Board where
-        (==) :: Board -> Board -> Bool
-        (Board b1) == (Board b2) = (b1 == b2)
+
 
     getBoardElement :: Board -> (Integer, Integer) -> Char
     getBoardElement (Board board) (i,j) = board ! (i,j)

@@ -8,11 +8,11 @@ module Shot where
     -- records outcome on the baord
     -- returns updated boat list and board
     checkShot (x,y) boats board = do 
-        (updatedBoats, hit) <- checkHitBoats (x,y) boats
-        if hit then
-            return (updatedBoats, updateBoardElement (x,y) board 'x')
-        else
-            return (boats, (updateBoardElement (x,y) board 'o'))
+        let (updatedBoats, hit) = checkHitBoats (x,y) boats in
+            if hit then
+                (updatedBoats, (updateBoardElement board (x,y) 'x')) :: ([Boat], Board)
+            else
+                (boats, (updateBoardElement board (x,y) 'o')) ::([Boat], Board)
         
 
         -- for the board
@@ -24,13 +24,14 @@ module Shot where
     
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
+
     checkHitBoats (xShot,yShot) (headBoat:restBoats) = do
-        updatedBoat <- checkHitBoat (xShot,yShot) headBoat
+        let updatedBoat = checkHitBoat (xShot,yShot) headBoat
         if headBoat /= updatedBoat then
-            return (updatedBoat:restBoats, True)
+            (updatedBoat:restBoats, True) :: ([Boat], Bool)
         else do
-            (updatedBoats, restHit) <- checkHitBoats (xShot,yShot) restBoats
-            return (headBoat:updatedBoats, restHit)
+            let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
+                (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
 
     checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
@@ -39,7 +40,7 @@ module Shot where
     -- return updated boat and bool if hit
     checkHitBoat (xShot,yShot) (Boat ((xi,yi):xyRest) (hitI:hitRest)) = do
         if (xShot == xi) && (yShot == yi) then
-            return (Boat ((xi,yi):xyRest) (True:hitRest))
+            (Boat ((xi,yi):xyRest) (True:hitRest))
         else 
             let (Boat xyRest hitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
             in Boat ((xi,yi):xyRest) (hitI:hitRest)
@@ -54,7 +55,7 @@ module Shot where
         x <- getLine
         putStrLn "What row do you want to fire at?"
         y <- getLine
-        coords <- (,) <$> read x <*> read y
+        coords <- (,) <$> read::Integer x <*> read::Integer y
         if checkBounds coords
             then return coords
             else do
