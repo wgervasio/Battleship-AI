@@ -13,34 +13,33 @@ module ShipData where
         deriving (Show)
 
 
-    getBoardElement :: Board -> (Integer, Integer) -> Char
+
     getBoardElement (Board board) (i,j) = board ! (i,j)
 
-    updateBoardElement :: Board -> (Integer, Integer) -> Char -> Board
+
     updateBoardElement (Board board) (i,j) value = Board (board // [((i,j),value)])
 
-    updateBoardElements :: Foldable t => Board -> t (Integer, Integer) -> Char -> Board
+
     updateBoardElements (Board board) positions value = foldl (\ boardNew position -> updateBoardElement boardNew position value) (Board board) positions
 
-    emptyBoard :: Board
+
     emptyBoard = (Board (array ((1,1),(10,10)) [((i,j), ' ') | i <- [1..10], j <- [1..10]]))
 
-    addBoatsToBoard :: [Boat] -> Board
+
     addBoatsToBoard boats = foldl (\ boardNew boat -> 
         updateBoardElements boardNew (positions boat) 'B')
          emptyBoard
           boats
     
-    
-    checkSunk :: Boat -> Bool
+
     -- checks if a boat is sunk
     checkSunk (Boat _ lst) = and lst
 
-    checkBounds :: (Integer, Integer) -> Bool
+
     checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 
 
-    printBoard :: Board -> IO ()
+
     printBoard (Board board) = do
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
         putStrLn "  -------------------"

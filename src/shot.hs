@@ -3,7 +3,7 @@ module Shot where
     import System.Random ( randomRIO )
     import ShipData (checkBounds)
     
-    checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
+
     -- checks if shot hit any boats
     -- records outcome on the baord
     -- returns updated boat list and board
@@ -22,7 +22,7 @@ module Shot where
     
     
     
-    checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
+ 
     checkHitBoats _ [] = ([], False)
 
     checkHitBoats (xShot,yShot) (headBoat:restBoats) = do
@@ -33,7 +33,7 @@ module Shot where
             let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
                 (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
 
-    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
+    
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
@@ -46,7 +46,7 @@ module Shot where
             in Boat ((xi,yi):xyRest) (hitI:hitRest)
 
 
-    promptShot :: IO (Integer, Integer)
+    
     -- prompts user for row and col position of shot
     -- checks if shot is valid
     -- returns shot coordinates, otherwise prompts again

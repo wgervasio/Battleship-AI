@@ -20,32 +20,23 @@ import Setup
 import System.Random
 
 
-startGame :: IO [Boat]
+
 -- places all 5 boats on the board
 -- places the enemy boats randomly
 -- plays the first turn for the player
 startGame=do
-   let enemyList = []
-   placeBoatRandom(5, enemyList)
-   placeBoatRandom(4, enemyList)
-   placeBoatRandom(3, enemyList)
-   placeBoatRandom(3, enemyList)
-   placeBoatRandom(2, enemyList)
+   let enemyList = foldl placeBoatRandom [] [2,3,3,4,5]
 
-   let playerList = []
-   placeBoat(5, playerList)
-   placeBoat(4, playerList)
-   placeBoat(3, playerList)
-   placeBoat(3, playerList)
-   placeBoat(2, playerList)
+
+   let playerList = foldl placeBoatRandom [] [2,3,3,4,5]
    -- place your 5 boats
    
-   playerTurn(playerList, enemyList, createBoard(playerList), createBoard(enemyList))
+   playerTurn(playerList, enemyList, addBoatsToBoard(playerList), addBoatsToBoard(enemyList))
    -- call player turn
 
 
 
-playerTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
+
 -- prompts user for shot
 -- checks if shot is valid
 -- checks if shot hits a boat
@@ -56,7 +47,7 @@ playerTurn plist elist pboard eboard = do
    printBoard(eboard)
 
 
-   let (x,y) =  promptShot()
+   let (x,y) =  promptShot
    let (newElist, newEboard) = checkShot((x,y), elist, eboard)
 
    -- print enemy board after shot
@@ -69,13 +60,13 @@ playerTurn plist elist pboard eboard = do
       enemyTurn(plist newElist pboard newEboard)
 
 
-enemyTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
+
 enemyTurn plist elist pboard eboard = do
    -- print player board
    -- TODO: fix this
    printBoard(pboard)
 
-   let (x,y) =  randomShot()
+   let (x,y) =  randomShot
 
    putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
    let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
@@ -86,16 +77,16 @@ enemyTurn plist elist pboard eboard = do
 
 
 
-gameWon :: [Boat] -> Bool
+
 -- checks if all boats are sunk in lst
 gameWon lst = and (map checkSunk lst)
 
 
-checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
+
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 -- check if two boats are overlapped
-checkOverlaps :: Boat -> Boat -> Bool
+
 checkOverlaps b1 b2 =
    any b1coords `elem` b2coords
       where
@@ -103,7 +94,7 @@ checkOverlaps b1 b2 =
          b2coords = positions b2
 
 
-placeBoat :: Integer -> [Boat] -> IO [Boat]
+
 placeBoat n lst = do
     putStrLn("you are now placing your boat of size " ++ show n ++ ".")
     putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
@@ -133,7 +124,7 @@ placeBoat n lst = do
         placeBoat n lst
     else return (boat:lst)
 
-placeBoatRandom :: Integer -> [Boat] -> IO [Boat]
+
 placeBoatRandom n lst = do
   -- random orientation/direction
   dir <- randomRIO (1, 2)
@@ -145,7 +136,6 @@ placeBoatRandom n lst = do
 
   return placeBoatRandomHelper n lst dirStr pointingStr
 
-grabLengths :: Integer -> Integer -> Integer -> String -> String -> (Integer, Integer, [(Integer, Integer)])
 grabLengths n start_x start_y dir pointing
       | dir == "V" && pointing == "R" = ((start_x + n), start_y, [(i, start_y) | i <- [(min(start_x, (start_x + n)))..(max(start_x, (start_x + n)))]])
       | dir == "V" && pointing == "L" = ((start_x - n), start_y, [(i, start_y) | i <- [(min(start_x, (start_x - n)))..(max(start_x, (start_x - n)))]])
@@ -153,14 +143,11 @@ grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "L" = (start_x, start_y - n, [(start_x, i) | i <- [(min(start_y, start_y - n))..(max(start_y, start_y - n))]])
 
 
-createBoat :: String -> Integer -> Integer -> Integer -> Integer -> Boat
-createBoat dir start_x start_y end_x end_y = Boat [if dir == "H" then (val0, i) else (i, val0) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] (replicate n False)
+createBoat dir start_x start_y end_x end_y n = Boat [if dir == "H" then (val0, i) else (i, val0) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] (replicate n False)
 
-checkOverlapsList :: Boat -> [Boat] -> Bool
 checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
 
-placeBoatRandomHelper :: Integer -> [Boat] -> String -> String -> IO [Boat]
 placeBoatRandomHelper n lst dir pointing = do
 
    (start_x, start_y) <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
@@ -169,7 +156,7 @@ placeBoatRandomHelper n lst dir pointing = do
    if not $ all checkBounds coords then
       placeBoatRandomHelper n lst dir pointing
    else
-      let boat = createBoat dir start_x start_y end_x end_y in 
+      let boat = createBoat dir start_x start_y end_x end_y n in 
       if checkOverlapsList boat lst then
          placeBoatRandom n lst
       else 
