@@ -79,10 +79,10 @@ enemyTurn plist elist pboard eboard = do
 
    putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
    let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
-   if gameWon newPlist then
-      putStrLn "Enemy won!"
-   else
-      playerTurn(newPlist elist newPboard eboard)
+      if gameWon newPlist then
+         putStrLn "Enemy won!"
+      else
+         playerTurn(newPlist elist newPboard eboard)
 
 
 
@@ -97,10 +97,10 @@ checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - 
 -- check if two boats are overlapped
 checkOverlaps :: Boat -> Boat -> Bool
 checkOverlaps b1 b2 =
-   any b1coords `elem` boat2coords
-   where
-      boat1coords = b1 (h:t)
-      boat2coords = b2 (h:t)
+   any b1coords `elem` b2coords
+      where
+         b1coords = positions b1 
+         b2coords = positions b2
 
 
 placeBoat :: Integer -> [Boat] -> IO [Boat]
