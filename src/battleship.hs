@@ -26,11 +26,11 @@ startGame :: IO [Boat]
 -- plays the first turn for the player
 startGame=do
    let enemyList = []
-   placeBoatRandom(5, playerList)
-   placeBoatRandom(4, playerList)
-   placeBoatRandom(3, playerList)
-   placeBoatRandom(3, playerList)
-   placeBoatRandom(2, playerList)
+   placeBoatRandom(5, enemyList)
+   placeBoatRandom(4, enemyList)
+   placeBoatRandom(3, enemyList)
+   placeBoatRandom(3, enemyList)
+   placeBoatRandom(2, enemyList)
 
    let playerList = []
    placeBoat(5, playerList)
