@@ -46,11 +46,11 @@ playerTurn :: [Boat] -> [Boat] -> [[Char]] -> [[Char]] -> Bool
 playerTurn plist elist pboard eboard = do
    -- print enemy board
    -- TODO change this
-   printBoard(pboard, eboard)
+   printBoard(eboard)
 
 
    (x,y) <- promptShot()
-   (elist-new, eboard-new)<- checkShot((x,y), elist, eboard)
+   (elist-new, eboard-new) <- checkShot((x,y), elist, eboard)
 
    -- print enemy board after shot
    -- TODO change this
