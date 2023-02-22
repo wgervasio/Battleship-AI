@@ -1,43 +1,46 @@
 module Shot where
-    import ShipData
-    import Battleship
-
+    import ShipData ( Board(..), Boat(..) )
+    
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
+    -- checks if shot hit any boats
+    -- records outcome on the baord
+    -- returns updated boat list and board
     checkShot (x,y) boats board = do 
         (updatedBoats, hit) <- checkHitBoats (x,y) boats
         if hit then
-            return (updatedBoats, updateBoard (x,y) board)
+            return (updatedBoats, updateBoardElement (x,y) board 'x')
         else
-            return (updatedBoats, board)
+            return (boats, (updateBoardElement (x,y) board 'o'))
         
 
         -- for the board
         -- find tuple in board that matches (x,y)
         -- if found, change char to 'x' if boat is hit
         -- otherwise change char to 'o'
-        
-        ([Boat [(0,0)] [False]], Board [['a']])
-
+    
+    
+    
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
     checkHitBoats (xShot,yShot) (headBoat:restBoats) = do
-        (updatedBoat, firstHit) <- checkHitBoat (xShot,yShot) headBoat
-        if firstHit then
+        updatedBoat <- checkHitBoat (xShot,yShot) headBoat
+        if headBoat /= updatedBoat then
             return (updatedBoat:restBoats, True)
         else do
             (updatedBoats, restHit) <- checkHitBoats (xShot,yShot) restBoats
-            return (updatedBoat:updatedBoats, restHit)
+            return (headBoat:updatedBoats, restHit)
 
-    checkHitBoat _ (Boat [] []) = (Boat [] [], False) 
+    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
+    checkHitBoat _ (Boat [] []) = (Boat [] []) 
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
     -- return updated boat and bool if hit
     checkHitBoat (xShot,yShot) (Boat ((xi,yi):xyRest) (hitI:hitRest)) = do
         if (xShot == xi) && (yShot == yi) then
-            return (Boat ((xi,yi):xyRest) (True:hitRest), True)
-        else do
-            (Boat xyRes, found) <- checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
-            return (Boat ((xi,yi):xyRes), found)
+            return (Boat ((xi,yi):xyRest) (True:hitRest))
+        else 
+            let (Boat xyRest hitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
+            in Boat ((xi,yi):xyRest) (hitI:hitRest)
 
 
     promptShot :: IO (Integer, Integer)

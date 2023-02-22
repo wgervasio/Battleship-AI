@@ -1,8 +1,8 @@
 module Setup where
 
-    import ShipData
+    import ShipData ( Board(..), Boat )
+    
+    
+    
 
-    createBoard = [['a']]
 
-    createBoard :: [Boat] -> Board
-    createBoard lst = Board [['a']]
