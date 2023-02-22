@@ -93,41 +93,46 @@ checkSunk :: Boat -> Bool
 -- checks if a boat is sunk
 checkSunk (Boat _ lst) = and lst
 
-
-
-
 checkBounds :: (Integer, Integer) -> Bool
 checkBounds (x, y) = (x >= 1 && x <= 10) && (y >= 1 && y <= 10)
 
 checkAligned :: (Integer, Integer) -> (Integer, Integer) -> Integer -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
+checkOverlaps :: [Boat] -> Bool
+-- TODO: implement this
 
-placeBoat :: Integer -> [Boat] -> [Boat]
+
+placeBoat :: Integer -> [Boat] -> IO [Boat]
 placeBoat n lst = do
-   -- we need to add checks for overlapping boats here 
-   putStrLn("you are now placing your boat of size " ++ n ".")
-   putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
-   dir <- getLine
-   let maincoord = if dir == "H" then "x" else "y"
-   let secondcoord = if dir == "H" then "y" else "x"
-   if dir =="H" then
-      putStrLn "What row is your boat on?"
-      val0 <- read getLine :: Integer
-      putStrLn "What column do you want the head of your boat to be at?"
-      val1 <- read getLine :: Integer
-      putStrLn "What column do you want the tail of your boat to be at?"
-      val2 <- read getLine :: Integer
-      (Boat [(i, val0) | i <- [(min(val1, val2))..(max(val1,val2))] [ False | i <- [(min(val1, val2))..(max(val1,val2))]]):lst
-   else 
-      putStrLn "What column is your boat on?"
-      val0 <- read getLine :: Integer
-      putStrLn "What row do you want the head of your boat to be at?"
-      val1 <- read getLine :: Integer
-      putStrLn "What row do you want the tail of of your boat to be at?"
-      val2 <- read getLine :: Integer
-      (Boat [(val0, i) | i <- [(min(val1, val2))..(max(val1,val2))] [ False | i <- [(min(val1, val2))..(max(val1,val2))]]):lst
-   
+      putStrLn("you are now placing your boat of size " ++ n ".")
+      putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
+      dir <- getLine
+      let maincoord = if dir == "H" then "x" else "y"
+      let secondcoord = if dir == "H" then "y" else "x"
+      (val0, val1, val2) <- if dir == "H" then do
+         putStrLn "What row is your boat on?"
+         row <- readLn :: IO Integer
+         putStrLn "What column do you want the head of your boat to be at?"
+         headCol <- readLn :: IO Integer
+         putStrLn "What column do you want the tail of your boat to be at?"
+         tailCol <- readLn :: IO Integer
+         return (row, headCol, tailCol)
+      else do
+         putStrLn "What column is your boat on?"
+         col <- readLn :: IO Integer
+         putStrLn "What row do you want the head of your boat to be at?"
+         headRow <- readLn :: IO Integer
+         putStrLn "What row do you want the tail of your boat to be at?"
+         tailRow <- readLn :: IO Integer
+         return (headRow, col, tailRow)
+   let boat = Boat [(if dir == "H" then (i, val0) else (val0, i)) | i <- [(min val1 val2)..(max val1 val2)]] (replicate (fromInteger n) False)
+   let is_overlap = any (checkOverlaps boat) lst
+   if is_overlap then do
+      putStrLn "You cannot place the boat here. Please try again."
+      placeBoat n lst
+   else return (boat:lst)
+
 placeBoatRandom :: Int -> [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
   -- random orientation/direction
@@ -141,13 +146,13 @@ placeBoatRandom n lst = do
   let loop = do
       start_x <- randomRIO (1, 10)
       start_y <- randomRIO (1, 10)
-      let (end_x, end_y, coords) = if dir == "H" then
-         if pointing == "L" then
+      let (end_x, end_y, coords) = if dir == 1 then
+         if pointing == 1 then
             let ex = start_x + n in (ex, start_y, [(i, start_y) | i <- [(min(start_x, ex))..(max(start_x, ex))]])
          else
             let ex = start_x - n in (ex, start_y, [(i, start_y) | i <- [(min(start_x, ex))..(max(start_x, ex))]])
          else
-            if pointing == "U" then
+            if pointing == 1 then
                let ey = start_y + n in (start_x, ey, [(start_x, i) | i <- [(min(start_y, ey))..(max(start_y, ey))]])
             else
                let ey = start_y - n in (start_x, ey, [(start_x, i) | i <- [(min(start_y, ey))..(max(start_y, ey))]])
@@ -155,11 +160,14 @@ placeBoatRandom n lst = do
       if not_valid then
          loop
       else 
-         let newBoat = if dirStr == "H" then
-            (Boat [(val0, i) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] [ False | i <- [(min(start_x, end_x))..(max(start_x, end_x))]]):lst
+         let boat = if dirStr == "H" then
+            Boat [(val0, i) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] (replicate n False):lst
          else
-            (Boat [(i, val0) | i <- [(min(start_y, end_y))..(max(start_y, end_y))]] [ False | i <- [(min(start_y, end_y))..(max(start_y, end_y))]])):lst
-         in return (newBoat:lst)
+            Boat [(i, val0) | i <- [(min(start_y, end_y))..(max(start_y, end_y))]] (replicate n False):lst
+      let is_overlap = any (checkOverlaps boat) lst
+      if is_overlap then do
+         placeBoatRandom n lst
+      else return (boat:lst)
    loop
 
 
