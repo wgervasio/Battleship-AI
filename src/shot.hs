@@ -7,6 +7,7 @@ module Shot where
     -- checks if shot hit any boats
     -- records outcome on the baord
     -- returns updated boat list and board
+    checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
     checkShot (x,y) boats board = do 
         let (updatedBoats, hit) = checkHitBoats (x,y) boats in
             if hit then
@@ -23,6 +24,7 @@ module Shot where
     
     
  
+    checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
 
     checkHitBoats (xShot,yShot) (headBoat:restBoats) = do
@@ -34,6 +36,7 @@ module Shot where
                 (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
 
     
+    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
@@ -50,6 +53,7 @@ module Shot where
     -- prompts user for row and col position of shot
     -- checks if shot is valid
     -- returns shot coordinates, otherwise prompts again
+    promptShot :: IO (Integer, Integer)
     promptShot = do
         putStrLn "What column do you want to fire at?"
         x <- getLine
