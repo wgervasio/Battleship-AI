@@ -35,8 +35,6 @@ startGame=do
    -- call player turn
 
 
-
-
 -- prompts user for shot
 -- checks if shot is valid
 -- checks if shot hits a boat
@@ -47,7 +45,7 @@ playerTurn plist elist pboard eboard = do
    printBoard(eboard)
 
 
-   let (x,y) =  promptShot
+   let (x,y) =  promptShot()
    let (newElist, newEboard) = checkShot((x,y), elist, eboard)
 
    -- print enemy board after shot
@@ -136,11 +134,12 @@ placeBoatRandom n lst = do
 
   return placeBoatRandomHelper n lst dirStr pointingStr
 
+grabLengths :: Int -> Int -> Int -> String -> String -> (Int, Int, [(Int, Int)])
 grabLengths n start_x start_y dir pointing
-      | dir == "V" && pointing == "R" = ((start_x + n), start_y, [(i, start_y) | i <- [(min(start_x, (start_x + n)))..(max(start_x, (start_x + n)))]])
-      | dir == "V" && pointing == "L" = ((start_x - n), start_y, [(i, start_y) | i <- [(min(start_x, (start_x - n)))..(max(start_x, (start_x - n)))]])
-      | dir == "H" && pointing == "R" = (start_x, start_y + n, [(start_x, i) | i <- [(min(start_y, start_y + n))..(max(start_y, start_y + n))]])
-      | dir == "H" && pointing == "L" = (start_x, start_y - n, [(start_x, i) | i <- [(min(start_y, start_y - n))..(max(start_y, start_y - n))]])
+      | dir == "V" && pointing == "R" = ((start_x + n), start_y, [(i, start_y) | i <- [(min start_x (start_x + n))..(max start_x (start_x + n))]])
+      | dir == "V" && pointing == "L" = ((start_x - n), start_y, [(i, start_y) | i <- [(min start_x (start_x - n))..(max start_x (start_x - n))]])
+      | dir == "H" && pointing == "R" = (start_x, (start_y + n), [(start_x, i) | i <- [(min start_y (start_y + n))..(max start_y (start_y + n))]])
+      | dir == "H" && pointing == "L" = (start_x, (start_y - n), [(start_x, i) | i <- [(min start_y (start_y - n))..(max start_y (start_y - n))]])
 
 
 createBoat dir start_x start_y end_x end_y n = Boat [if dir == "H" then (val0, i) else (i, val0) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] (replicate n False)
