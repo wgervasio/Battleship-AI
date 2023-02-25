@@ -27,7 +27,7 @@ import System.IO
 
 startGame=do
    enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   playerList <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
+   playerList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
 
    
 --    -- place your 5 boats
@@ -179,5 +179,4 @@ placeBoatRandomHelper n lst dir pointing = do
          return (boat:lst)
 
 
-
-
+   

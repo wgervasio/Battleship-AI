@@ -1,8 +1,6 @@
 module Shot where
-    import ShipData ( updateBoardElement, Board, Boat(Boat) )
+    import ShipData 
     import System.Random ( randomRIO )
-    import ShipData (checkBounds)
-    
 
     -- checks if shot hit any boats
     -- records outcome on the baord
@@ -41,6 +39,8 @@ module Shot where
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
     -- return updated boat and bool if hit
+    checkHitBoat _ (Boat [] lst) = (Boat [] lst) 
+    checkHitBoat _ (Boat lst []) = (Boat lst []) 
     checkHitBoat (xShot,yShot) (Boat ((xi,yi):xyRest) (hitI:hitRest)) = do
         if (xShot == xi) && (yShot == yi) then
             (Boat ((xi,yi):xyRest) (True:hitRest))
