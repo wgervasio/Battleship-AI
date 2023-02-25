@@ -88,7 +88,7 @@ enemyTurn plist elist pboard eboard [] = do
 
    -- putStrLn "Enemy fired!"
    let newTargets = if hit then addAdjacent [] coords newPboard else []
-   print newTargets
+   -- print newTargets
 
    threadDelay delaySecs
    putStrLn "\n\n\nPlayer board after shot:\n\n\n"
