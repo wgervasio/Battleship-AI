@@ -161,33 +161,34 @@ checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
 placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
-    putStrLn("You are now placing your boat of size " ++ show n ++ ".")
-    putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
-    dir <- getLine
-    let maincoord = if dir == "H" then "x" else "y"
-    let secondcoord = if dir == "H" then "y" else "x"
-    (val0, val1, val2) <- if dir == "H" then do
-        putStrLn "What row is your boat on?"
-        row <- readLn :: IO Integer
-        putStrLn "What column do you want the head of your boat to be at?"
-        headCol <- readLn :: IO Integer
-        putStrLn "What column do you want the tail of your boat to be at?"
-        tailCol <- readLn :: IO Integer
-        return (row, headCol, tailCol)
-    else do
-        putStrLn "What column is your boat on?"
-        col <- readLn :: IO Integer
-        putStrLn "What row do you want the head of your boat to be at?"
-        headRow <- readLn :: IO Integer
-        putStrLn "What row do you want the tail of your boat to be at?"
-        tailRow <- readLn :: IO Integer
-        return (headRow, col, tailRow)
-    let boat = Boat [(if dir == "H" then (i, val0) else (val0, i)) | i <- [(min val1 val2)..(max val1 val2)]] (replicate (fromInteger n) False)
-    nonMonadBoats <- lst
-    if checkOverlapsList boat nonMonadBoats then do
-        putStrLn "You cannot place the boat here. Please try again."
-        placeBoat n lst
-    else return (boat:nonMonadBoats)
+   putStrLn("You are now placing your boat of size " ++ show n ++ ".")
+   putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
+   dir <- getLine
+
+   if dir == "V" then
+      putStrLn "Do you want your boat to point up or down? Type U or D"
+   else
+      putStrLn "Do you want your boat to point left or right? Type L or R"
+   pointing <- getLine
+
+   putStrLn "What row is your boat on?"
+   headRow <- readLn :: IO Integer
+   putStrLn "What column do you want the head of your boat to be at?"
+   headCol <- readLn :: IO Integer
+
+   let coords = grabLengths n headCol headRow dir pointing
+
+   if not $ all checkBounds coords then do
+      putStrLn "Invalid coordinates. Please try again."
+      placeBoat n lst
+   else do
+      unMonadLst <- lst
+      let boat = Boat coords (replicate (fromInteger n) False) 
+      if checkOverlapsList boat unMonadLst then do
+         putStrLn "This overlaps another boat. Please try again."
+         placeBoat n lst
+      else 
+         return (boat:unMonadLst)
 
 placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
@@ -196,8 +197,9 @@ placeBoatRandom n lst = do
   let dirStr = if dir `mod` 2 == 0 then "H" else "V"
 
   -- random pointing
+  let (op1,op2) = if dirStr == "H" then ("L", "R") else ("U", "D")
   pointing::Integer <- randomRIO (1, 2)
-  let pointingStr = if pointing `mod` 2 == 0 then "L" else "R"
+  let pointingStr = if pointing `mod` 2 == 0 then op1 else op2
 
   unMonadLst <- lst
   placeBoatRandomHelper n unMonadLst dirStr pointingStr
@@ -206,8 +208,8 @@ grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, I
 grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]
       | dir == "H" && pointing == "L" = [(i, start_y) | i <- [start_x..(start_x+n)]]
-      | dir == "V" && pointing == "R" = [(start_x, i) | i <- [start_y..(start_y+n)]]
-      | dir == "V" && pointing == "L" = [(start_x, i) | i <- [(start_y - n)..start_y]]
+      | dir == "V" && pointing == "U" = [(start_x, i) | i <- [start_y..(start_y+n)]]
+      | dir == "V" && pointing == "D" = [(start_x, i) | i <- [(start_y - n)..start_y]]
 
 
 placeBoatRandomHelper :: Integer -> [Boat] -> String -> String -> IO [Boat]
