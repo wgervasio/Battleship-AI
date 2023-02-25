@@ -27,18 +27,18 @@ import System.IO
 
 startGame=do
    let enemyList = foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   let playerList = foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
+   playerList <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
 
    print True
    
 --    -- place your 5 boats
    
 --    -- call player turn
-   pboats <- playerList
-   eboats <- enemyList
-   let pboard =  addBoatsToBoard pboats
-   let eboard = addBoatsToBoard eboats
-   playerTurn pboats eboats pboard eboard
+   -- pboats <- playerList
+   -- eboats <- enemyList
+   -- let pboard =  addBoatsToBoard pboats
+   -- let eboard = addBoatsToBoard eboats
+   -- playerTurn pboats eboats pboard eboard
    -- print True
    
 
@@ -47,19 +47,19 @@ startGame=do
 -- -- checks if shot is valid
 -- -- checks if shot hits a boat
 -- -- checks if all enemy boats are sunk
-playerTurn plist elist pboard eboard = do
+-- playerTurn plist elist pboard eboard = do
 --    -- print enemy board
 --    -- TODO change this
-   printBoard(eboard)
+   -- printBoard(eboard)
 
 
-   let (x,y) =  promptShot()
-   let (newElist, newEboard) = checkShot((x,y), elist, eboard)
+   -- let (x,y) =  promptShot()
+   -- let (newElist, newEboard) = checkShot((x,y), elist, eboard)
 
 --    -- print enemy board after shot
 --    -- TODO change this
-   printBoard(newEboard)
-   print True
+   -- printBoard(newEboard)
+   -- print True
 
 --    if gameWon newElist then
 --       putStrLn "You won!"
@@ -75,12 +75,12 @@ playerTurn plist elist pboard eboard = do
 
 --    let (x,y) =  randomShot
 
-   putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
-      if gameWon newPlist then
-         putStrLn "Enemy won!"
-      else
-         playerTurn newPlist elist newPboard eboard
+   -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
+   -- let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
+   --    if gameWon newPlist then
+   --       putStrLn "Enemy won!"
+   --    else
+   --       playerTurn newPlist elist newPboard eboard
 
 
 
@@ -129,22 +129,26 @@ placeBoat n lst = do
         tailRow <- readLn :: IO Integer
         return (headRow, col, tailRow)
     let boat = Boat [(if dir == "H" then (i, val0) else (val0, i)) | i <- [(min val1 val2)..(max val1 val2)]] (replicate (fromInteger n) False)
-    let is_overlap = any (checkOverlaps boat) lst
+    
+    nonMonadBoats <- lst
+    let is_overlap = any (checkOverlaps boat) nonMonadBoats
     if is_overlap then do
         putStrLn "You cannot place the boat here. Please try again."
         placeBoat n lst
-    else return (boat:lst)
+    else return (boat:nonMonadBoats)
 
-placeBoatRandom :: Int -> [Boat] -> [Boat]
+placeBoatRandom :: Int -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
   -- random orientation/direction
+  dir::Integer <- randomRIO (1, 2)
   let dirStr = if dir `mod` 2 == 0 then "H" else "V"
 
   -- random pointing
-  pointing <- randomRIO (1, 2)
+  pointing::Integer <- randomRIO (1, 2)
   let pointingStr = if pointing `mod` 2 == 0 then "L" else "R"
 
-  placeBoatRandomHelper n lst dirStr pointingStr
+  unMonadLst <- lst
+  placeBoatRandomHelper n unMonadLst dirStr pointingStr
 
 grabLengths :: Int -> Int -> Int -> String -> String -> (Int, Int, [(Int, Int)])
 grabLengths n start_x start_y dir pointing
@@ -160,7 +164,7 @@ createBoat dir start_x start_y end_x end_y = Boat [if dir == "H" then (fromInteg
 checkOverlapsList :: Boat -> [Boat] -> Bool
 checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
-placeBoatRandomHelper :: Int -> [Boat] -> String -> String -> [Boat]
+placeBoatRandomHelper :: Int -> [Boat] -> String -> String -> IO [Boat]
 placeBoatRandomHelper n lst dir pointing = do
 
    (start_x, start_y) <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
@@ -173,7 +177,7 @@ placeBoatRandomHelper n lst dir pointing = do
       if checkOverlapsList boat lst then
          placeBoatRandomHelper n lst dir pointing
       else 
-         return boat
+         return (boat:lst)
 
 
 
