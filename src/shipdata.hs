@@ -2,6 +2,7 @@
 module ShipData where
     import Data.Array ( Array, (!), (//), listArray, array )
     import Data.List
+    import Data.Foldable
     
     data Boat = Boat {positions :: [(Integer, Integer)], hitmap:: [Bool]}
         deriving (Show)
@@ -43,14 +44,11 @@ module ShipData where
     printBoard (Board board) = do
         putStrLn "  ENEMY BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
-       
-        printBoardRecursion (Board board) 1
-    
-    printBoardRecursion :: Board -> Integer -> IO()
-    printBoardRecursion _ 11 = putStrLn ""
-    printBoardRecursion board n = do
-        putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [getBoardElement board (i, n) | i <- [1..10]]))
-        printBoardRecursion board (n + 1)
+        putStrLn "  -------------------"
+        mapM_ (\n -> do
+            putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [getBoardElement (Board board) (i, n) | i <- [1..10]])))
+            [1..10]
+        
         
     printBoardEnemy :: Board -> IO ()
     printBoardEnemy (Board board) = do
