@@ -52,7 +52,7 @@ playerTurn plist elist pboard eboard targets = do
    printBoard(eboard)
   
 
-   print (elist)
+   print (elist) -- for debugging and quick aim bot
    coords <- getValidShot eboard promptShot
 
    let (newElist, newEboard) = checkShot coords elist eboard
@@ -74,6 +74,8 @@ enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> [(Integer, Integer)]-> IO ()
 enemyTurn plist elist pboard eboard [] = do
    -- print player board
    -- TODO: fix this
+   putStrLn"THE EMPTY LIST"
+   putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
    printBoard(pboard)
 
    coords <- pickShot pboard
@@ -82,6 +84,13 @@ enemyTurn plist elist pboard eboard [] = do
    let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
    putStrLn "Enemy fired!"
    let newTargets = if hit then addAdjacent [] coords else []
+
+   threadDelay delaySecs
+   putStrLn "\n\n\nPlayer board after shot:\n\n\n"
+   printBoard(newPboard)
+   print(newPlist) -- for debugging
+   threadDelay delaySecs
+
    if gameWon newPlist then
       putStrLn "Enemy won!"
    else
@@ -90,17 +99,31 @@ enemyTurn plist elist pboard eboard [] = do
 enemyTurn plist elist pboard eboard (target:targets) = do
    -- print player board
    -- TODO: fix this
+   putStrLn "THE NON EMPTY LIST"
+   putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
    printBoard(pboard)
 
    coords <- pure target
 
+   if getBoardElement pboard coords `elem` ['o','x'] then do
+      enemyTurn plist elist pboard eboard targets
+   else do
+      let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
+      let newTargets = if hit then addAdjacent targets coords else targets
+
+      threadDelay delaySecs
+      putStrLn "\n\n\nPlayer board after shot:\n\n\n"
+      printBoard(newPboard)
+      print(newPlist) -- for debugging
+      threadDelay delaySecs
+
+      if gameWon newPlist then
+         putStrLn "Enemy won!"
+      else
+            playerTurn newPlist elist newPboard eboard newTargets
+      
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
-   let newTargets = if hit then addAdjacent targets coords else targets
-   if gameWon newPlist then
-      putStrLn "Enemy won!"
-   else
-         playerTurn newPlist elist newPboard eboard newTargets
+   
    
 
 
@@ -109,10 +132,6 @@ enemyTurn plist elist pboard eboard (target:targets) = do
 gameWon :: [Boat] -> Bool
 gameWon lst = and (map checkSunk lst)
 
-
-
-checkAligned :: (Eq a, Num a) => (a, a) -> (a, a) -> a -> Bool
-checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 
 addAdjacent :: [(Integer, Integer)] -> (Integer, Integer) -> [(Integer, Integer)]
