@@ -2,29 +2,22 @@ module Shot where
     import ShipData 
     import System.Random ( randomRIO )
 
-    -- checks if shot hit any boats
-    -- records outcome on the baord
-    -- returns updated boat list and board
-    checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
-    checkShot _ [] board = ([], board)
-    checkShot (x,y) boats board =
-        let (updatedBoats, hit) = checkHitBoats (x,y) boats in
-            if hit then
-                (updatedBoats, (updateBoardElement board (x,y) 'x')) :: ([Boat], Board)
-            else
-                (boats, (updateBoardElement board (x,y) 'o')) ::([Boat], Board)
 
     -- same behaviour as checkShot
     -- but returns hit bool to adjust target space
-    checkShotEnemy :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
-    checkShotEnemy _ [] board = ([], board, False)
-    checkShotEnemy (x,y) boats board =
-        let (updatedBoats, hit) = checkHitBoats (x,y) boats in
-            if hit then
-                (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
+    checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
+    checkShot _ [] board = ([], board, False)
+    checkShot (x,y) boats board =
+        let previousState  = getBoardElement board (x,y) in
+            if  previousState `elem` ['o','x'] then 
+                (boats, board, if previousState == 'x' then True else False)
             else
-                (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
-        
+                let (updatedBoats, hit) = checkHitBoats (x,y) boats in
+                    if hit then
+                        (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
+                    else
+                        (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
+                
 
     
     checkHitBoat :: (Integer, Integer) -> Boat -> Boat
@@ -105,11 +98,11 @@ module Shot where
             randomShot
 
 
-    getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
-    getValidShot eboard coordLambda = do
-         potentialCoords <- coordLambda
-         if getBoardElement eboard potentialCoords `elem` ['o', 'x'] then do
-            putStrLn "Target already hit. Try again."
-            getValidShot eboard coordLambda
-         else
-            return potentialCoords 
+    -- getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
+    -- getValidShot eboard coordLambda = do
+    --      potentialCoords <- coordLambda
+    --      if getBoardElement eboard potentialCoords `elem` ['o', 'x'] then do
+    --         putStrLn "Target already hit. Try again."
+    --         getValidShot eboard coordLambda
+    --      else
+    --         return potentialCoords 

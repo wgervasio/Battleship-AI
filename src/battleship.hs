@@ -53,9 +53,9 @@ playerTurn plist elist pboard eboard targets = do
   
 
    print (elist) -- for debugging and quick aim bot
-   coords <- getValidShot eboard promptShot
+   coords <- promptShot
 
-   let (newElist, newEboard) = checkShot coords elist eboard
+   let (newElist, newEboard, _) = checkShot coords elist eboard
 
    -- print enemy board after shot
    threadDelay delaySecs
@@ -78,10 +78,13 @@ enemyTurn plist elist pboard eboard [] = do
    putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
    printBoard(pboard)
 
+
    coords <- pickShot pboard
 
+   putStrLn("picked shot")
+
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
+   let (newPlist, newPboard, hit) = checkShot coords plist pboard 
    putStrLn "Enemy fired!"
    let newTargets = if hit then addAdjacent [] coords else []
 
@@ -108,7 +111,7 @@ enemyTurn plist elist pboard eboard (target:targets) = do
    if getBoardElement pboard coords `elem` ['o','x'] then do
       enemyTurn plist elist pboard eboard targets
    else do
-      let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
+      let (newPlist, newPboard, hit) = checkShot coords plist pboard 
       let newTargets = if hit then addAdjacent targets coords else targets
 
       threadDelay delaySecs
