@@ -4,11 +4,7 @@
 module ShotTest where
     import Shot 
     import Test.Framework
-
-    testBoard = emptyBoard
-    testBoat= Boat [(1,2), (1,3)] [False, False]
-    testBoat2= Boat [(2,2), (2,3)] [False, False]
-
+    
     testCheckShot:: Assertion
     testCheckShot = do
         let boatBoard = addBoatsToBoard [Boat [(1,2), (1,3)] [False, False]]
