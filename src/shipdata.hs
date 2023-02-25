@@ -54,6 +54,10 @@ module ShipData where
     printBoardEnemy  board = do
         putStrLn "  PLAYERS BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
+        putStrLn "  -------------------"
+        mapM_ (\n -> do
+            putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement (Board board) (i, n) /= 'B' then getBoardElement (Board board) (i, n) else '_'  | i <- [1..10]])))
+            [1..10]
         
         mapM_ (\n -> do
             putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]])))
