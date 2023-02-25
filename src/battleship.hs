@@ -44,41 +44,43 @@ startGame=do
 -- -- checks if shot is valid
 -- -- checks if shot hits a boat
 -- -- checks if all enemy boats are sunk
+   
+playerTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
 playerTurn plist elist pboard eboard = do
 --    -- print enemy board
 --    -- TODO change this
    printBoard(eboard)
 
 
-   -- let (x,y) =  promptShot()
-   -- let (newElist, newEboard) = checkShot((x,y), elist, eboard)
+   coords <-  promptShot
+   let (newElist, newEboard) = checkShot coords elist eboard
 
---    -- print enemy board after shot
---    -- TODO change this
-   -- printBoard(newEboard)
-   -- print True
-
---    if gameWon newElist then
---       putStrLn "You won!"
---    else
---       enemyTurn(plist newElist pboard newEboard)
+   -- print enemy board after shot
+   printBoard(newEboard)
 
 
+   if gameWon newElist then
+      putStrLn "You won!"
+   else
+      enemyTurn plist newElist pboard newEboard
 
--- enemyTurn plist elist pboard eboard = do
+
+
+enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
+enemyTurn plist elist pboard eboard = do
 --    -- print player board
 --    -- TODO: fix this
---    printBoard(pboard)
+   printBoard(pboard)
 
---    let (x,y) =  randomShot
+   coords <- randomShot
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   -- let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
-   --    if gameWon newPlist then
-   --       putStrLn "Enemy won!"
-   --    else
-   --       playerTurn newPlist elist newPboard eboard
-
+   let (newPlist, newPboard) = checkShot coords plist pboard in
+      if gameWon newPlist then
+         putStrLn "Enemy won!"
+      else
+         playerTurn newPlist elist newPboard eboard
+   
 
 
 
