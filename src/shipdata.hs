@@ -41,29 +41,25 @@ module ShipData where
 
 
     printBoard :: Board -> IO ()
-    printBoard (Board board) = do
+    printBoard board = do
         putStrLn "  ENEMY BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
         putStrLn "  -------------------"
         mapM_ (\n -> do
-            putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [getBoardElement (Board board) (i, n) | i <- [1..10]])))
+            putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [getBoardElement board (i, n) | i <- [1..10]])))
             [1..10]
         
         
     printBoardEnemy :: Board -> IO ()
-    printBoardEnemy (Board board) = do
+    printBoardEnemy  board = do
         putStrLn "  PLAYERS BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
         
-        printBoardRecursion (Board board) 1
+        mapM_ (\n -> do
+            putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]])))
+            [1..10]
     
-    printBoardEnemyRecursion :: Board -> Integer -> IO()
-    printBoardEnemyRecursion _ 11 = putStrLn ""
-    printBoardEnemyRecursion board n = do
-        putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]]))
-        printBoardEnemyRecursion board (n + 1)
-
-   
+ 
 
 
     
