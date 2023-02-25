@@ -51,8 +51,9 @@ playerTurn plist elist pboard eboard targets = do
 --    -- TODO change this
    printBoard(eboard)
 
+   
+   coords <- getValidShot eboard promptShot
 
-   coords <-  promptShot
    let (newElist, newEboard) = checkShot coords elist eboard
 
    -- print enemy board after shot

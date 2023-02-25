@@ -90,3 +90,26 @@ module Shot where
             else do
                 putStrLn "Invalid coordinates. Try again."
                 promptShot
+
+
+    randomShot :: IO (Integer, Integer)
+    -- randomly generates a shot
+    -- checks if shot is valid
+    -- returns shot coordinates, otherwise tries again
+    randomShot = do
+        coords <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
+        if checkBounds coords then
+            return coords
+        else
+            -- silently try again
+            randomShot
+
+
+    getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
+    getValidShot eboard coordLambda = do
+         potentialCoords <- coordLambda
+         if getBoardElement eboard potentialCoords /= '_' then do
+            putStrLn "Target already hit. Try again."
+            getValidShot eboard coordLambda
+         else
+            return potentialCoords 

@@ -19,7 +19,7 @@ module ShipData where
     updateBoardElement (Board board) (i,j) value = Board (board // [((i,j),value)])
 
 
-    updateBoardElements (Board board) positions value = foldl (\ boardNew position -> updateBoardElement boardNew position value) (Board board) positions
+    updateBoardElements board positions value = foldl (\ boardNew position -> updateBoardElement boardNew position value) board positions
 
 
     emptyBoard = (Board (array ((1,1),(10,10)) [((i,j), '_') | i <- [1..10], j <- [1..10]]))
