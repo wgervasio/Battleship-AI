@@ -80,7 +80,7 @@ enemyTurn plist elist pboard eboard [] = do
    printBoard(pboard)
 
 
-   coords <- pickShot pboard
+   coords <- getValidShot pboard pickShot
 
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
@@ -137,10 +137,6 @@ enemyTurn plist elist pboard eboard (target:targets) = do
 gameWon :: [Boat] -> Bool
 gameWon lst = and (map checkSunk lst)
 
-
-
-addAdjacent :: [(Integer, Integer)] -> (Integer, Integer) -> Board -> [(Integer, Integer)]
-addAdjacent shots (x,y) board =  (filter (\x -> not (x `elem` shots)) (filter (\x -> (not (shotAlready board x))) (filter checkBounds [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]))) ++ shots
 
 
 checkOverlaps :: Boat -> Boat -> Bool

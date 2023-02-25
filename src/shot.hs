@@ -7,17 +7,12 @@ module Shot where
     -- but returns hit bool to adjust target space
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
     checkShot _ [] board = ([], board, False)
-    checkShot (x,y) boats board =
-        
-        if  shotAlready board (x,y) then 
-            let previousState  = getBoardElement board (x,y) in
-                (boats, board, if previousState == 'x' then True else False)
-        else
-            let (updatedBoats, hit) = checkHitBoats (x,y) boats in
-                if hit then
-                    (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
-                else
-                    (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
+    checkShot coords boats board =
+        let (updatedBoats, hit) = checkHitBoats coords boats in
+            if hit then
+                (updatedBoats, (updateBoardElement board coords 'x'), hit)
+            else
+                (boats, (updateBoardElement board coords 'o'), hit)
             
 
     
@@ -28,12 +23,12 @@ module Shot where
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
     checkHitBoat _ (Boat [] lst) = (Boat [] lst) 
     checkHitBoat _ (Boat lst []) = (Boat lst []) 
-    checkHitBoat (xShot,yShot) (Boat ((xi,yi):xyRest) (hitI:hitRest)) = do
-        if (xShot == xi) && (yShot == yi) then
-            (Boat ((xi,yi):xyRest) (True:hitRest))
+    checkHitBoat shotCoords (Boat (coords:xyRest) (hitI:hitRest)) = do
+        if shotCoords == coords then
+            (Boat (coords:xyRest) (True:hitRest))
         else 
-            let (Boat _ updatedHitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
-            in Boat ((xi,yi):xyRest) (hitI:updatedHitRest)
+            let (Boat _ updatedHitRest) = checkHitBoat shotCoords (Boat xyRest hitRest)
+            in Boat (coords:xyRest) (hitI:updatedHitRest)
 
 
     -- b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
@@ -47,14 +42,14 @@ module Shot where
 
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
-    checkHitBoats (xShot,yShot) (headBoat:restBoats) = 
+    checkHitBoats shotCoords (headBoat:restBoats) = 
         -- does not work if point was already hit
-        let updatedBoat = checkHitBoat (xShot,yShot) headBoat in
+        let updatedBoat = checkHitBoat shotCoords headBoat in
         if headBoat /= updatedBoat then
-            (updatedBoat:restBoats, True) :: ([Boat], Bool)
+            (updatedBoat:restBoats, True)
         else
-            let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
-                (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
+            let (updatedBoats, restHit) = checkHitBoats shotCoords restBoats in
+                (headBoat:updatedBoats, restHit)
 
     -- lob1 = []
     -- lob2 = [b1]
@@ -79,31 +74,21 @@ module Shot where
         putStrLn "What row do you want to fire at?"
         y <- getLine
         coords <- (,) <$> readIO x <*> readIO y
-        if checkBounds coords then
+        return coords
+        
+    validateInput coords pred failFunc errMsg = do
+        if pred coords then
             return coords
-            else do
-                putStrLn "Invalid coordinates. Try again."
-                promptShot
+        else do
+            errMsg
+            failFunc
 
-
-    randomShot :: IO (Integer, Integer)
-    -- randomly generates a shot
-    -- checks if shot is valid
-    -- returns shot coordinates, otherwise tries again
-    randomShot = do
-        coords <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
-        if checkBounds coords then
-            return coords
-        else
-            -- silently try again
-            randomShot
-
+    validCoords board coords =  (not (shotAlready board coords)) && checkBounds coords
 
     getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
-    getValidShot eboard coordLambda = do
-         potentialCoords <- coordLambda
-         if shotAlready eboard potentialCoords then do
-            putStrLn "Target already hit. Try again."
-            getValidShot eboard coordLambda
-         else
-            return potentialCoords 
+    getValidShot board coordLambda = do
+        potentialCoords <- coordLambda
+        validateInput potentialCoords 
+            (validCoords board)
+            (getValidShot board coordLambda)
+            (putStrLn "Target already hit. Try again.")
