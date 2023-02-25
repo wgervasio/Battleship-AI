@@ -52,10 +52,11 @@ playerTurn plist elist pboard eboard targets = do
    printBoard(eboard)
   
 
-   print (elist) -- for debugging and quick aim bot
+   -- print (elist) -- for debugging and quick aim bot
+   -- print (targets) -- for debugging
    coords <- getValidShot eboard promptShot
 
-   let (newElist, newEboard) = checkShot coords elist eboard
+   let (newElist, newEboard, _) = checkShot coords elist eboard
 
    -- print enemy board after shot
    threadDelay delaySecs
@@ -78,12 +79,16 @@ enemyTurn plist elist pboard eboard [] = do
    putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
    printBoard(pboard)
 
+
    coords <- pickShot pboard
 
+
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
-   putStrLn "Enemy fired!"
-   let newTargets = if hit then addAdjacent [] coords else []
+   let (newPlist, newPboard, hit) = checkShot coords plist pboard 
+
+   -- putStrLn "Enemy fired!"
+   let newTargets = if hit then addAdjacent [] coords newPboard else []
+   -- print newTargets
 
    threadDelay delaySecs
    putStrLn "\n\n\nPlayer board after shot:\n\n\n"
@@ -105,16 +110,16 @@ enemyTurn plist elist pboard eboard (target:targets) = do
 
    coords <- pure target
 
-   if getBoardElement pboard coords `elem` ['o','x'] then do
+   if shotAlready pboard coords then do
       enemyTurn plist elist pboard eboard targets
    else do
-      let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
-      let newTargets = if hit then addAdjacent targets coords else targets
+      let (newPlist, newPboard, hit) = checkShot coords plist pboard 
+      let newTargets = if hit then addAdjacent targets coords newPboard else targets
 
       threadDelay delaySecs
       putStrLn "\n\n\nPlayer board after shot:\n\n\n"
       printBoard(newPboard)
-      print(newPlist) -- for debugging
+      -- print(newPlist) -- for debugging
       threadDelay delaySecs
 
       if gameWon newPlist then
@@ -134,8 +139,8 @@ gameWon lst = and (map checkSunk lst)
 
 
 
-addAdjacent :: [(Integer, Integer)] -> (Integer, Integer) -> [(Integer, Integer)]
-addAdjacent shots (x,y) = (filter checkBounds [(x+1,y), (x-1,y), (x,y+1), (x,y-1)])
+addAdjacent :: [(Integer, Integer)] -> (Integer, Integer) -> Board -> [(Integer, Integer)]
+addAdjacent shots (x,y) board =  (filter (\x -> not (x `elem` shots)) (filter (\x -> (not (shotAlready board x))) (filter checkBounds [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]))) ++ shots
 
 
 checkOverlaps :: Boat -> Boat -> Bool
