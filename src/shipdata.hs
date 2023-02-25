@@ -61,7 +61,7 @@ module ShipData where
     printBoardEnemyRecursion _ 11 = putStrLn ""
     printBoardEnemyRecursion board n = do
         putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]]))
-        printBoardRecursion board (n + 1)
+        printBoardEnemyRecursion board (n + 1)
 
    
 
