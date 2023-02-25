@@ -92,3 +92,13 @@ module Shot where
         else
             -- silently try again
             randomShot
+
+
+    getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
+    getValidShot eboard coordLambda = do
+         potentialCoords <- coordLambda
+         if getBoardElement eboard potentialCoords /= '_' then do
+            putStrLn "Target already hit. Try again."
+            getValidShot eboard coordLambda
+         else
+            return potentialCoords 

@@ -50,8 +50,9 @@ playerTurn plist elist pboard eboard = do
 --    -- TODO change this
    printBoard(eboard)
 
+   
+   coords <- getValidShot eboard promptShot
 
-   coords <-  promptShot
    let (newElist, newEboard) = checkShot coords elist eboard
 
    -- print enemy board after shot
@@ -71,7 +72,7 @@ enemyTurn plist elist pboard eboard = do
    -- TODO: fix this
    printBoard(pboard)
 
-   coords <- randomShot
+   coords <- getValidShot pboard randomShot
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
    let (newPlist, newPboard) = checkShot coords plist pboard in
