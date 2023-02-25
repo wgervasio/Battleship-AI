@@ -40,6 +40,7 @@ module ShipData where
 
 
 
+    printBoard :: Board -> IO ()
     printBoard (Board board) = do
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
         putStrLn "  -------------------"

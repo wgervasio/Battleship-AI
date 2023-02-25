@@ -18,71 +18,82 @@ import ShipData
 import Shot
 import Setup
 import System.Random
-
+import System.IO
 
 
 -- places all 5 boats on the board
 -- places the enemy boats randomly
 -- plays the first turn for the player
+
 startGame=do
-   let enemyList = foldl placeBoatRandom [] [2,3,3,4,5]
+   let enemyList = foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
+   let playerList = foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
 
-
-   let playerList = foldl placeBoatRandom [] [2,3,3,4,5]
-   -- place your 5 boats
+   print True
    
-   playerTurn(playerList, enemyList, addBoatsToBoard(playerList), addBoatsToBoard(enemyList))
-   -- call player turn
+--    -- place your 5 boats
+   
+--    -- call player turn
+   pboats <- playerList
+   eboats <- enemyList
+   let pboard =  addBoatsToBoard pboats
+   let eboard = addBoatsToBoard eboats
+   playerTurn pboats eboats pboard eboard
+   -- print True
+   
 
 
 
 
--- prompts user for shot
--- checks if shot is valid
--- checks if shot hits a boat
--- checks if all enemy boats are sunk
+-- -- prompts user for shot
+-- -- checks if shot is valid
+-- -- checks if shot hits a boat
+-- -- checks if all enemy boats are sunk
 playerTurn plist elist pboard eboard = do
-   -- print enemy board
-   -- TODO change this
+--    -- print enemy board
+--    -- TODO change this
    printBoard(eboard)
 
 
-   let (x,y) =  promptShot
+   (x,y) <-  promptShot
    let (newElist, newEboard) = checkShot((x,y), elist, eboard)
 
-   -- print enemy board after shot
-   -- TODO change this
+--    -- print enemy board after shot
+--    -- TODO change this
    printBoard(newEboard)
+   print True
 
-   if gameWon newElist then
-      putStrLn "You won!"
-   else
-      enemyTurn(plist newElist pboard newEboard)
+--    if gameWon newElist then
+--       putStrLn "You won!"
+--    else
+--       enemyTurn(plist newElist pboard newEboard)
 
 
 
-enemyTurn plist elist pboard eboard = do
-   -- print player board
-   -- TODO: fix this
-   printBoard(pboard)
+-- enemyTurn plist elist pboard eboard = do
+--    -- print player board
+--    -- TODO: fix this
+--    printBoard(pboard)
 
-   let (x,y) =  randomShot
+--    let (x,y) =  randomShot
 
-   putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
-      if gameWon newPlist then
-         putStrLn "Enemy won!"
-      else
-         playerTurn(newPlist elist newPboard eboard)
+--    putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
+--    let (newPlist, newPboard) = checkShot((x,y), plist, pboard) in
+--       if gameWon newPlist then
+--          putStrLn "Enemy won!"
+--       else
+--          playerTurn(newPlist elist newPboard eboard)
 
 
 
 
 -- checks if all boats are sunk in lst
+gameWon :: [Boat] -> Bool
 gameWon lst = and (map checkSunk lst)
 
 
 
+checkAligned :: (Eq a, Num a) => (a, a) -> (a, a) -> a -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 -- check if two boats are overlapped
@@ -95,6 +106,8 @@ checkOverlaps b1 b2 =
 
 
 
+
+placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
     putStrLn("you are now placing your boat of size " ++ show n ++ ".")
     putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
@@ -125,9 +138,9 @@ placeBoat n lst = do
     else return (boat:lst)
 
 
+placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
   -- random orientation/direction
-  dir <- randomRIO (1, 2)
   let dirStr = if dir `mod` 2 == 0 then "H" else "V"
 
   -- random pointing

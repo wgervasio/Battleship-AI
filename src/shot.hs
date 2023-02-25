@@ -8,7 +8,7 @@ module Shot where
     -- records outcome on the baord
     -- returns updated boat list and board
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board)
-    checkShot (x,y) boats board = do 
+    checkShot (x,y) boats board =
         let (updatedBoats, hit) = checkHitBoats (x,y) boats in
             if hit then
                 (updatedBoats, (updateBoardElement board (x,y) 'x')) :: ([Boat], Board)
@@ -27,11 +27,11 @@ module Shot where
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
 
-    checkHitBoats (xShot,yShot) (headBoat:restBoats) = do
-        let updatedBoat = checkHitBoat (xShot,yShot) headBoat
+    checkHitBoats (xShot,yShot) (headBoat:restBoats) = 
+        let updatedBoat = checkHitBoat (xShot,yShot) headBoat in
         if headBoat /= updatedBoat then
             (updatedBoat:restBoats, True) :: ([Boat], Bool)
-        else do
+        else
             let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
                 (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
 
