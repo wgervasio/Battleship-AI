@@ -13,6 +13,17 @@ module Shot where
                 (updatedBoats, (updateBoardElement board (x,y) 'x')) :: ([Boat], Board)
             else
                 (boats, (updateBoardElement board (x,y) 'o')) ::([Boat], Board)
+
+    -- same behaviour as checkShot
+    -- but returns hit bool to adjust target space
+    checkShotEnemy :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
+    checkShotEnemy _ [] board = ([], board, False)
+    checkShotEnemy (x,y) boats board =
+        let (updatedBoats, hit) = checkHitBoats (x,y) boats in
+            if hit then
+                (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
+            else
+                (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
         
 
     

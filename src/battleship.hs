@@ -17,6 +17,7 @@ type Player = State -> Action
 import ShipData
 import Shot
 import Setup
+import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
@@ -34,7 +35,7 @@ startGame=do
    -- call player turn
    let pboard =  addBoatsToBoard playerList
    let eboard = addBoatsToBoard enemyList
-   playerTurn playerList enemyList pboard eboard
+   playerTurn playerList enemyList pboard eboard []
    
 
 
@@ -43,8 +44,8 @@ startGame=do
 -- checks if shot hits a boat
 -- checks if all enemy boats are sunk
    
-playerTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
-playerTurn plist elist pboard eboard = do
+playerTurn :: [Boat] -> [Boat] -> Board -> Board -> [(Integer, Integer)]-> IO ()
+playerTurn plist elist pboard eboard targets = do
 --    -- print enemy board
 --    -- TODO change this
    putStrLn "\n\n\nYour turn. Enemy board:\n\n\n"
@@ -65,31 +66,42 @@ playerTurn plist elist pboard eboard = do
    if gameWon newElist then
       putStrLn "You won!"
    else
-      enemyTurn plist newElist pboard newEboard
+      enemyTurn plist newElist pboard newEboard targets
 
 
 
-enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
-enemyTurn plist elist pboard eboard = do
-   
-   putStrLn "\n\n\nEnemy turn. Player board before shot:\n\n\n"
+enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> [(Integer, Integer)]-> IO ()
+enemyTurn plist elist pboard eboard [] = do
+   -- print player board
+   -- TODO: fix this
    printBoard(pboard)
 
-   coords <- getValidShot pboard randomShot
+   coords <- pickShot pboard
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard) = checkShot coords plist pboard
-   
-   threadDelay delaySecs
-   putStrLn "\n\n\nPlayer board after shot:\n\n\n"
-   printBoard(newPboard)
-   threadDelay delaySecs
-
+   let (newPlist, newPboard) = checkShotEnemy coords plist pboard 
+   putStrLn "Enemy fired!"
+   let newTargets = if hit then addAdjacent [] coords else []
    if gameWon newPlist then
       putStrLn "Enemy won!"
    else
-      playerTurn newPlist elist newPboard eboard
+      playerTurn newPlist elist newPboard eboard newTargets
 
+enemyTurn plist elist pboard eboard (target:targets) = do
+   -- print player board
+   -- TODO: fix this
+   printBoard(pboard)
+
+   coords <- pure target
+
+   -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
+   let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
+   let newTargets = if hit then addAdjacent targets coords else targets
+   if gameWon newPlist then
+      putStrLn "Enemy won!"
+   else
+         playerTurn newPlist elist newPboard eboard newTargets
+   
 
 
 
@@ -103,7 +115,8 @@ checkAligned :: (Eq a, Num a) => (a, a) -> (a, a) -> a -> Bool
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 
-
+addAdjacent :: [(Integer, Integer)] -> (Integer, Integer) -> [(Integer, Integer)]
+addAdjacent shots (x,y) = (filter checkBounds [(x+1,y), (x-1,y), (x,y+1), (x,y-1)])
 
 
 checkOverlaps :: Boat -> Boat -> Bool
