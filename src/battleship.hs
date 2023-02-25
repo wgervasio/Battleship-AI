@@ -26,7 +26,7 @@ import System.IO
 -- plays the first turn for the player
 
 startGame=do
-   let enemyList = foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
+   enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
    playerList <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
 
    print True
