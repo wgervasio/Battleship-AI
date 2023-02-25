@@ -1,8 +1,8 @@
-
-
+{-# LANGUAGE ParallelListComp #-}
 module ShipData where
     import Data.Array ( Array, (!), (//), listArray, array )
-
+    import Data.List
+    
     data Boat = Boat {positions :: [(Integer, Integer)], hitmap:: [Bool]}
         deriving (Show)
     instance Eq Boat where
@@ -16,14 +16,13 @@ module ShipData where
 
     getBoardElement (Board board) (i,j) = board ! (i,j)
 
-
     updateBoardElement (Board board) (i,j) value = Board (board // [((i,j),value)])
 
 
     updateBoardElements (Board board) positions value = foldl (\ boardNew position -> updateBoardElement boardNew position value) (Board board) positions
 
 
-    emptyBoard = (Board (array ((1,1),(10,10)) [((i,j), ' ') | i <- [1..10], j <- [1..10]]))
+    emptyBoard = (Board (array ((1,1),(10,10)) [((i,j), '_') | i <- [1..10], j <- [1..10]]))
 
 
     addBoatsToBoard boats = foldl (\ boardNew boat -> 
@@ -44,4 +43,29 @@ module ShipData where
     printBoard (Board board) = do
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
         putStrLn "  -------------------"
+        printBoardRecursion (Board board) 1
+    
+    printBoardRecursion :: Board -> Integer -> IO()
+    printBoardRecursion _ 10 = putStrLn ""
+    printBoardRecursion board n = do
+        putStrLn (intersperse ' ' ((show n) ++ [getBoardElement board (i, n) | i <- [1..10]]))
+        printBoardRecursion board (n + 1)
+        
+    printBoardEnemy :: Board -> IO ()
+    printBoardEnemy (Board board) = do
+        putStrLn "  1 2 3 4 5 6 7 8 9 10"
+        putStrLn "  -------------------"
+        printBoardRecursion (Board board) 1
+    
+    printBoardEnemyRecursion :: Board -> Integer -> IO()
+    printBoardEnemyRecursion _ 10 = putStrLn ""
+    printBoardEnemyRecursion board n = do
+        putStrLn (intersperse ' ' ((show n) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]]))
+        printBoardRecursion board (n + 1)
+
+   
+
+
+    
+    
 
