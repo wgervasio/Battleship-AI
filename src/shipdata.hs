@@ -41,8 +41,9 @@ module ShipData where
 
     printBoard :: Board -> IO ()
     printBoard (Board board) = do
+        putStrLn "  ENEMY BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
-        putStrLn "  -------------------"
+       
         printBoardRecursion (Board board) 1
     
     printBoardRecursion :: Board -> Integer -> IO()
@@ -53,8 +54,9 @@ module ShipData where
         
     printBoardEnemy :: Board -> IO ()
     printBoardEnemy (Board board) = do
+        putStrLn "  PLAYERS BOARD"
         putStrLn "  1 2 3 4 5 6 7 8 9 10"
-        putStrLn "  -------------------"
+        
         printBoardRecursion (Board board) 1
     
     printBoardEnemyRecursion :: Board -> Integer -> IO()

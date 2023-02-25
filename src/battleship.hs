@@ -76,7 +76,7 @@ enemyTurn plist elist pboard eboard [] = do
    coords <- pickShot pboard
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard) = checkShotEnemy coords plist pboard 
+   let (newPlist, newPboard, hit) = checkShotEnemy coords plist pboard 
    putStrLn "Enemy fired!"
    let newTargets = if hit then addAdjacent [] coords else []
    if gameWon newPlist then
