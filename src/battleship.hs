@@ -71,7 +71,7 @@ enemyTurn plist elist pboard eboard = do
       if gameWon newPlist then
          putStrLn "Enemy won!"
       else
-         playerTurn(newPlist elist newPboard eboard)
+         playerTurn newPlist elist newPboard eboard
 
 
 
