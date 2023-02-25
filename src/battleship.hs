@@ -19,19 +19,18 @@ import Shot
 import Setup
 import System.Random
 import System.IO
+import Control.Concurrent (threadDelay)
 
-
+delaySecs = 0 * 1000000
 -- places all 5 boats on the board
 -- places the enemy boats randomly
 -- plays the first turn for the player
 
 startGame=do
-   enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   playerList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
 
-   
+   enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
    -- place your 5 boats
-   
+   playerList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
    -- call player turn
    let pboard =  addBoatsToBoard playerList
    let eboard = addBoatsToBoard enemyList
@@ -48,16 +47,20 @@ playerTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
 playerTurn plist elist pboard eboard = do
 --    -- print enemy board
 --    -- TODO change this
+   putStrLn "\n\n\nYour turn. Enemy board:\n\n\n"
    printBoard(eboard)
+  
 
-   
+   print (elist)
    coords <- getValidShot eboard promptShot
 
    let (newElist, newEboard) = checkShot coords elist eboard
 
    -- print enemy board after shot
+   threadDelay delaySecs
+   putStrLn "\n\n\nEnemy board after shot:\n\n\n"
    printBoard(newEboard)
-
+   threadDelay delaySecs
 
    if gameWon newElist then
       putStrLn "You won!"
@@ -68,19 +71,25 @@ playerTurn plist elist pboard eboard = do
 
 enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> IO ()
 enemyTurn plist elist pboard eboard = do
-   -- print player board
-   -- TODO: fix this
+   
+   putStrLn "\n\n\nEnemy turn. Player board before shot:\n\n\n"
    printBoard(pboard)
 
    coords <- getValidShot pboard randomShot
 
    -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard) = checkShot coords plist pboard in
-      if gameWon newPlist then
-         putStrLn "Enemy won!"
-      else
-         playerTurn newPlist elist newPboard eboard
+   let (newPlist, newPboard) = checkShot coords plist pboard
    
+   threadDelay delaySecs
+   putStrLn "\n\n\nPlayer board after shot:\n\n\n"
+   printBoard(newPboard)
+   threadDelay delaySecs
+
+   if gameWon newPlist then
+      putStrLn "Enemy won!"
+   else
+      playerTurn newPlist elist newPboard eboard
+
 
 
 
@@ -167,7 +176,7 @@ placeBoat n lst = do
         placeBoat n lst
     else return (boat:nonMonadBoats)
 
-placeBoatRandom :: Int -> IO [Boat] -> IO [Boat]
+placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
   -- random orientation/direction
   dir::Integer <- randomRIO (1, 2)
@@ -180,29 +189,25 @@ placeBoatRandom n lst = do
   unMonadLst <- lst
   placeBoatRandomHelper n unMonadLst dirStr pointingStr
 
-grabLengths :: Int -> Int -> Int -> String -> String -> (Int, Int, [(Int, Int)])
+grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, Integer)]
 grabLengths n start_x start_y dir pointing
-      | dir == "V" && pointing == "R" = ((start_x + n), start_y, [(i, start_y) | i <- [(min start_x (start_x + n))..(max start_x (start_x + n))]])
-      | dir == "V" && pointing == "L" = ((start_x - n), start_y, [(i, start_y) | i <- [(min start_x (start_x - n))..(max start_x (start_x - n))]])
-      | dir == "H" && pointing == "R" = (start_x, (start_y + n), [(start_x, i) | i <- [(min start_y (start_y + n))..(max start_y (start_y + n))]])
-      | dir == "H" && pointing == "L" = (start_x, (start_y - n), [(start_x, i) | i <- [(min start_y (start_y - n))..(max start_y (start_y - n))]])
-
-createBoat :: String -> Int -> Int -> Int -> Int -> Boat
-createBoat dir start_x start_y end_x end_y = Boat [if dir == "H" then (fromIntegral start_x, i) else (i, fromIntegral start_y) | i <- [(min (fromIntegral start_x) (fromIntegral end_x))..(max (fromIntegral start_x) (fromIntegral end_x))]] (replicate (max (end_x - start_x) (end_y - start_y) + 1) False)
--- todo: change this to include start_y and end_y 
+      | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]
+      | dir == "H" && pointing == "L" = [(i, start_y) | i <- [start_x..(start_x+n)]]
+      | dir == "V" && pointing == "R" = [(start_x, i) | i <- [start_y..(start_y+n)]]
+      | dir == "V" && pointing == "L" = [(start_x, i) | i <- [(start_y - n)..start_y]]
 
 
-
-placeBoatRandomHelper :: Int -> [Boat] -> String -> String -> IO [Boat]
+placeBoatRandomHelper :: Integer -> [Boat] -> String -> String -> IO [Boat]
 placeBoatRandomHelper n lst dir pointing = do
 
+   -- generate heads of boats
    (start_x, start_y) <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
 
-   let (end_x, end_y, coords) = grabLengths n start_x start_y dir pointing
+   let coords = grabLengths (n - 1) start_x start_y dir pointing
    if not $ all checkBounds coords then
       placeBoatRandomHelper n lst dir pointing
    else
-      let boat = createBoat dir start_x start_y end_x end_y in 
+      let boat = Boat coords (replicate (fromInteger n) False)  in 
       if checkOverlapsList boat lst then
          placeBoatRandomHelper n lst dir pointing
       else 

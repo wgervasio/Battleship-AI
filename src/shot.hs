@@ -97,7 +97,7 @@ module Shot where
     getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
     getValidShot eboard coordLambda = do
          potentialCoords <- coordLambda
-         if getBoardElement eboard potentialCoords /= '_' then do
+         if getBoardElement eboard potentialCoords `elem` ['o', 'x'] then do
             putStrLn "Target already hit. Try again."
             getValidShot eboard coordLambda
          else
