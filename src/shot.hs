@@ -48,8 +48,6 @@ module Shot where
             let (Boat xyRest hitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
             in Boat ((xi,yi):xyRest) (hitI:hitRest)
 
-
-    
     -- prompts user for row and col position of shot
     -- checks if shot is valid
     -- returns shot coordinates, otherwise prompts again
