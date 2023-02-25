@@ -3,8 +3,9 @@ module Shot where
     import System.Random ( randomRIO )
 
 
-    -- same behaviour as checkShot
-    -- but returns hit bool to adjust target space
+    -- check through the entire boat list to see if the shot hits any
+    -- handles any updates needed to the boat and board 
+    -- returns the boat, board, and boolean value reflecting whether the shot was a hit
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
     checkShot _ [] board = ([], board, False)
     checkShot (x,y) boats board =
@@ -19,12 +20,10 @@ module Shot where
                 else
                     (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
             
-
-    
-    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
     -- return updated boat and bool if hit
+    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
     checkHitBoat _ (Boat [] lst) = (Boat [] lst) 
     checkHitBoat _ (Boat lst []) = (Boat lst []) 
@@ -45,14 +44,18 @@ module Shot where
     -- checkHitBoat (1,1) b3 -> false
     -- checkHitBoat (1,2) b2 -> false
 
+    -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
+    -- was hit or not, modifying the boat in the list of neede
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
     checkHitBoats (xShot,yShot) (headBoat:restBoats) = 
         -- does not work if point was already hit
         let updatedBoat = checkHitBoat (xShot,yShot) headBoat in
         if headBoat /= updatedBoat then
+            -- if head /= updated, we know updated was hit and can keep recursing
             (updatedBoat:restBoats, True) :: ([Boat], Bool)
         else
+            -- keep recursing
             let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
                 (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
 
@@ -85,20 +88,7 @@ module Shot where
                 putStrLn "Invalid coordinates. Try again."
                 promptShot
 
-
-    randomShot :: IO (Integer, Integer)
-    -- randomly generates a shot
-    -- checks if shot is valid
-    -- returns shot coordinates, otherwise tries again
-    randomShot = do
-        coords <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
-        if checkBounds coords then
-            return coords
-        else
-            -- silently try again
-            randomShot
-
-
+    -- repeatedly prompt the player until they provide an input that doesn't hit a cell they previously fired on
     getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
     getValidShot eboard coordLambda = do
          potentialCoords <- coordLambda
