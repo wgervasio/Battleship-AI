@@ -34,16 +34,6 @@ module Shot where
             let (Boat _ updatedHitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
             in Boat ((xi,yi):xyRest) (hitI:updatedHitRest)
 
-
-    -- b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
-    -- b2 = Boat [(10,10),(9,9),(8,8)] [False, True, False]
-    -- b3 = Boat [(5,4),(3,2),(1,0)] [True, True, True]
-    -- checkHitBoat (1,1) b1 -> true
-    -- checkHitBoat (9,9) b2 -> true
-    -- checkHitBoat (1,0) b3 -> true
-    -- checkHitBoat (1,1) b3 -> false
-    -- checkHitBoat (1,2) b2 -> false
-
     -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
     -- was hit or not, modifying the boat in the list of neede
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
@@ -58,19 +48,6 @@ module Shot where
             -- keep recursing
             let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
                 (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
-
-    -- lob1 = []
-    -- lob2 = [b1]
-    -- lob3 = [b1, b2]
-    -- lob4 = [b1, b2, b3]
-
-
-    -- checkHitBoats (1,1) lob1 -> ([], False)
-    -- checkHitBoats (1,1) lob2 -> ([Boat [(1,1),(1,2),(1,3)] [True,False,False]], True)
-    -- checkHitBoats (8,8) lob3 -> ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,True]], True)
-    -- could be an error if not handled:
-    -- checkHitBoats (1,0) lob4 -> ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,False],Boat [(5,4),(3,2),(1,0)] [True,True,True]], False)
-    -- checkHitBoats (1,5) lob4 -> ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,False],Boat [(5,4),(3,2),(1,0)] [True,True,True]], False)
 
     -- prompts user for row and col position of shot
     -- checks if shot is valid
