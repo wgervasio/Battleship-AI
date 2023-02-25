@@ -8,16 +8,17 @@ module Shot where
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
     checkShot _ [] board = ([], board, False)
     checkShot (x,y) boats board =
-        let previousState  = getBoardElement board (x,y) in
-            if  previousState `elem` ['o','x'] then 
+        
+        if  shotAlready board (x,y) then 
+            let previousState  = getBoardElement board (x,y) in
                 (boats, board, if previousState == 'x' then True else False)
-            else
-                let (updatedBoats, hit) = checkHitBoats (x,y) boats in
-                    if hit then
-                        (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
-                    else
-                        (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
-                
+        else
+            let (updatedBoats, hit) = checkHitBoats (x,y) boats in
+                if hit then
+                    (updatedBoats, (updateBoardElement board (x,y) 'x'), hit) :: ([Boat], Board, Bool)
+                else
+                    (boats, (updateBoardElement board (x,y) 'o'), hit) ::([Boat], Board, Bool)
+            
 
     
     checkHitBoat :: (Integer, Integer) -> Boat -> Boat
@@ -98,11 +99,11 @@ module Shot where
             randomShot
 
 
-    -- getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
-    -- getValidShot eboard coordLambda = do
-    --      potentialCoords <- coordLambda
-    --      if getBoardElement eboard potentialCoords `elem` ['o', 'x'] then do
-    --         putStrLn "Target already hit. Try again."
-    --         getValidShot eboard coordLambda
-    --      else
-    --         return potentialCoords 
+    getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
+    getValidShot eboard coordLambda = do
+         potentialCoords <- coordLambda
+         if shotAlready eboard potentialCoords then do
+            putStrLn "Target already hit. Try again."
+            getValidShot eboard coordLambda
+         else
+            return potentialCoords 

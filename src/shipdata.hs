@@ -63,6 +63,8 @@ module ShipData where
             putStrLn (intersperse ' ' ((if n <= 9 then show n else show 0) ++ [if getBoardElement board (i, n) /= 'B' then getBoardElement board (i, n) else '_' | i <- [1..10]])))
             [1..10]
     
+    shotAlready :: Board -> (Integer, Integer) -> Bool
+    shotAlready board coords = (getBoardElement board coords) `elem` ['o','x']
  
 
 
