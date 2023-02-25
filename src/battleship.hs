@@ -84,9 +84,9 @@ gameWon lst = and (map checkSunk lst)
 checkAligned (x,y) (w,z) num = if (x /= w) && (y /= z) then False else (abs(x - w) == num) || (abs(y -z ) == num)
 
 -- check if two boats are overlapped
-
+checkOverlaps :: Boat -> Boat -> Bool
 checkOverlaps b1 b2 =
-   any b1coords `elem` b2coords
+   any (`elem` b2coords) b1coords
       where
          b1coords = positions b1 
          b2coords = positions b2
@@ -122,7 +122,7 @@ placeBoat n lst = do
         placeBoat n lst
     else return (boat:lst)
 
-
+placeBoatRandom :: Int -> [Boat] -> [Boat]
 placeBoatRandom n lst = do
   -- random orientation/direction
   dir <- randomRIO (1, 2)
@@ -132,7 +132,7 @@ placeBoatRandom n lst = do
   pointing <- randomRIO (1, 2)
   let pointingStr = if pointing `mod` 2 == 0 then "L" else "R"
 
-  return placeBoatRandomHelper n lst dirStr pointingStr
+  placeBoatRandomHelper n lst dirStr pointingStr
 
 grabLengths :: Int -> Int -> Int -> String -> String -> (Int, Int, [(Int, Int)])
 grabLengths n start_x start_y dir pointing
@@ -141,12 +141,14 @@ grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "R" = (start_x, (start_y + n), [(start_x, i) | i <- [(min start_y (start_y + n))..(max start_y (start_y + n))]])
       | dir == "H" && pointing == "L" = (start_x, (start_y - n), [(start_x, i) | i <- [(min start_y (start_y - n))..(max start_y (start_y - n))]])
 
+createBoat :: String -> Int -> Int -> Int -> Int -> Boat
+createBoat dir start_x start_y end_x end_y = Boat [if dir == "H" then (fromIntegral start_x, i) else (i, fromIntegral start_y) | i <- [(min (fromIntegral start_x) (fromIntegral end_x))..(max (fromIntegral start_x) (fromIntegral end_x))]] (replicate (max (end_x - start_x) (end_y - start_y) + 1) False)
+-- todo: change this to include start_y and end_y 
 
-createBoat dir start_x start_y end_x end_y n = Boat [if dir == "H" then (val0, i) else (i, val0) | i <- [(min(start_x, end_x))..(max(start_x, end_x))]] (replicate n False)
-
+checkOverlapsList :: Boat -> [Boat] -> Bool
 checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
-
+placeBoatRandomHelper :: Int -> [Boat] -> String -> String -> [Boat]
 placeBoatRandomHelper n lst dir pointing = do
 
    (start_x, start_y) <- (,) <$> randomRIO (1, 10) <*> randomRIO (1, 10)
@@ -155,11 +157,11 @@ placeBoatRandomHelper n lst dir pointing = do
    if not $ all checkBounds coords then
       placeBoatRandomHelper n lst dir pointing
    else
-      let boat = createBoat dir start_x start_y end_x end_y n in 
+      let boat = createBoat dir start_x start_y end_x end_y in 
       if checkOverlapsList boat lst then
-         placeBoatRandom n lst
+         placeBoatRandomHelper n lst dir pointing
       else 
-         return (boat:lst)
+         return boat
 
 
 
