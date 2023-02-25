@@ -1,9 +1,9 @@
 module Main where
 
-import Battleship
+import BattleShip
 import ShipData
 import Shot
 import Setup
 import System.Random
 
-(1 + 2)
+main = do startGame
