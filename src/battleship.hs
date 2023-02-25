@@ -29,17 +29,14 @@ startGame=do
    enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
    playerList <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
 
-   print True
    
 --    -- place your 5 boats
    
 --    -- call player turn
-   -- pboats <- playerList
-   -- eboats <- enemyList
-   -- let pboard =  addBoatsToBoard pboats
-   -- let eboard = addBoatsToBoard eboats
-   -- playerTurn pboats eboats pboard eboard
-   -- print True
+   let pboard =  addBoatsToBoard playerList
+   let eboard = addBoatsToBoard enemyList
+   playerTurn playerList enemyList pboard eboard
+   print True
    
 
 
@@ -47,10 +44,10 @@ startGame=do
 -- -- checks if shot is valid
 -- -- checks if shot hits a boat
 -- -- checks if all enemy boats are sunk
--- playerTurn plist elist pboard eboard = do
+playerTurn plist elist pboard eboard = do
 --    -- print enemy board
 --    -- TODO change this
-   -- printBoard(eboard)
+   printBoard(eboard)
 
 
    -- let (x,y) =  promptShot()
