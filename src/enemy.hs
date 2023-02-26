@@ -8,6 +8,7 @@ module Enemy where
 
 
     -- whiteSquares = [(1,1),(1,3),... (2,2),(2,4),...(3,1),(3,3),...]
+    -- creates a list of all squares with parity 2, similar to the white squares on a chessboard
     whiteSquares :: [(Integer, Integer)]
     whiteSquares = [(x,y) | x <- [1,3..10], y <- [1,3..10]] ++ [(x,y) | x <- [2,4..10], y <- [2,4..10]]
     -- if there are no shots adjacent to a hit ship, we pick a random square with parity of 2

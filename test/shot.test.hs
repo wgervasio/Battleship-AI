@@ -4,31 +4,39 @@
 module ShotTest where
     import Shot 
     import Test.Framework
-
-    testBoard = emptyBoard
-    testBoat= Boat [(1,2), (1,3)] [False, False]
-    testBoat2= Boat [(2,2), (2,3)] [False, False]
-
-    testCheckShot :: Assertion
+    
+    testCheckShot:: Assertion
     testCheckShot = do
-        assertEqual (checkShot (1,2) [testBoat] testBoard) ((updateBoardElement testBoard (1,2) 'x'), Boat [(1,2), (1,3)] [True, False])
-        assertEqual (checkShot (2,2) [testBoat] testBoard) (testBoard, testBoat)
-
-    testCheckShotEnemy :: Assertion
-    testCheckShotEnemy = do
-        assertEqual (checkShot (1,2) [testBoat] testBoard) ((updateBoardElement testBoard (1,2) 'x'), Boat [(1,2), (1,3)] [True, False], True)
-        assertEqual (checkShot (2,2) [testBoat] testBoard) (testBoard, testBoat, False)
+        let boatBoard = addBoatsToBoard [Boat [(1,2), (1,3)] [False, False]]
+        assertEqual (checkShot (1,2) [testBoat] boatBoard) ((updateBoardElement boatBoard (1,2) 'x'), [Boat [(1,2), (1,3)] [True, False]], True)
+        assertEqual (checkShot (2,2) [testBoat] boatBoard) ((updateBoardElement boatBoard (2,2) 'o'), [testBoat], False)
 
     testCheckHitBoat :: Assertion
     testCheckHitBoat = do
-        assertEqual (checkHitBoat (1,2) testBoat) (Boat [(1,2), (1,3)] [True, False])
-        assertEqual (checkHitBoat (1,3) testBoat) (Boat [(1,2), (1,3)] [False, True])
-        assertEqual (checkHitBoat (2,2) testBoat) (Boat [(1,2), (1,3)] [False, False])
+        let b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
+        let b2 = Boat [(10,10),(9,9),(8,8)] [False, True, False]
+        let b3 = Boat [(5,4),(3,2),(1,0)] [True, True, True]
+        assertEqual (checkHitBoat (1,1) b1) ([(1,1),(1,2),(1,3)] [True, False, False])
+        assertEqual (checkHitBoat (9,9) b2) (Boat [(10,10),(9,9),(8,8)] [False, True, False])
+        assertEqual (checkHitBoat (2,2) b3) (Boat [(5,4),(3,2),(1,0)] [True, True, True])
+        assertEqual (checkHitBoat (1,1) b3) (Boat [(5,4),(3,2),(1,0)] [True, True, True])
+        assertEqual (checkHitBoat (1,2) b2) (Boat [(10,10),(9,9),(8,8)] [False, True, False])
+        assertEqual (checkHitBoat (2,2) b1) ([(1,1),(1,2),(1,3)] [False, False, False])
+
 
     testCheckHitBoats :: Assertion
     testCheckHitBoats = do
-        assertEqual (checkHitBoats (1,2) [testBoat, testBoat2]) [Boat [(1,2), (1,3)] [True, False], Boat [(2,2), (2,3)] [False, False]]
-        assertEqual (checkHitBoats (2,2) [testBoat, testBoat2]) [Boat [(1,2), (1,3)] [False, False], Boat [(2,2), (2,3)] [True, False]]
-        assertEqual (checkHitBoats (3,2) [testBoat, testBoat2]) [Boat [(1,2), (1,3)] [False, False], Boat [(2,2), (2,3)] [False, False]]
+        let b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
+        let b2 = Boat [(10,10),(9,9),(8,8)] [False, True, False]
+        let b3 = Boat [(5,4),(3,2),(1,0)] [True, True, True]
+        lob1 = []
+        lob2 = [b1]
+        lob3 = [b1, b2]
+        lob4 = [b1, b2, b3]
+        assertEqual (checkHitBoats (1,1) lob1) ([], False)
+        assertEqual (checkHitBoats (1,1) lob2) ([Boat [(1,1),(1,2),(1,3)] [True,False,False]], True)
+        assertEqual (checkHitBoats (8,8) lob3)  ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,True]], True)
+        assertEqual (checkHitBoats (1,0) lob4) ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,False],Boat [(5,4),(3,2),(1,0)] [True,True,True]], False)
+        assertEqual (checkHitBoats (1,5) lob4) ([Boat [(1,1),(1,2),(1,3)] [False,False,False],Boat [(10,10),(9,9),(8,8)] [False,True,False],Boat [(5,4),(3,2),(1,0)] [True,True,True]], False)
 
   
