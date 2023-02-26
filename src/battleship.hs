@@ -21,7 +21,7 @@ import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
-import qualified GHC.TypeLits as enemy
+import qualified GHC.TypeLits
 
 delaySecs = 0 * 1000000
 
@@ -159,34 +159,10 @@ checkOverlaps b1 b2 =
          b1coords = positions b1 
          b2coords = positions b2
 
--- b0 = Boat [] []
--- b1 = Boat [(1,1), (1,2), (1,3)] [False, False, False]
--- b2 = Boat [(1,1), (1,2), (1,3)] [False, True, False]
--- b3 = Boat [(1,1), (4,4), (5,5)] [False, False, False]
--- b4 = Boat [(2,2), (4,4), (7,7)] [True, False, False]
--- b5 = Boat [(3,3), (5,5), (7,7)] [False, False, True]
--- checkOverlaps b1 b2 -> true
--- checkOverlaps b2 b3 -> true
--- checkOverlaps b3 b4 -> true
--- checkOverlaps b4 b5 -> true
--- checkOverlaps b5 b1 -> false
--- checkOverlaps b4 b2 -> false 
--- checkOverlaps b0 b1 -> false
-
 checkOverlapsList :: Boat -> [Boat] -> Bool
 -- check if single boat has overlap with any boat in list
 checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
--- lob1 = []
--- lob2 = [b2, b3, b4, b5]
--- lob3 = [b3]
--- lob4 = [b1, b5]
-
--- checkOverlapsList b1 lob1 -> false
--- checkOverlapsList b1 lob2 -> true
--- checkOverlapsList b1 lob3 -> true
--- checkOverlapsList b0  lob4 -> false
--- checkOverlapsList (Boat [(10,10), (9,9)] [True, False])  lob4 -> false
 
 
 
@@ -222,7 +198,7 @@ placeBoat n lst = do
       else 
          return (boat:unMonadLst)
 
--- place a random boat onto the board. used for creating enemy boat positions
+-- create a boat of length n in a valid board position 
 placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
   -- create a random boat oriented either horizontally or vertically
@@ -237,7 +213,7 @@ placeBoatRandom n lst = do
   unMonadLst <- lst
   placeBoatRandomHelper n unMonadLst dirStr pointingStr
 
--- provide length of a board given it's length, starting x and y, direction and pointing
+-- provide a list of coordinates reflecting a boat's position given positional data 
 grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, Integer)]
 grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]
