@@ -5,13 +5,13 @@ module ShotTest where
     import Shot 
     import Test.Framework
     
-    testCheckShot:: Assertion
+    test_CheckShot:: Assertion
     testCheckShot = do
         let boatBoard = addBoatsToBoard [Boat [(1,2), (1,3)] [False, False]]
         assertEqual (checkShot (1,2) [testBoat] boatBoard) ((updateBoardElement boatBoard (1,2) 'x'), [Boat [(1,2), (1,3)] [True, False]], True)
         assertEqual (checkShot (2,2) [testBoat] boatBoard) ((updateBoardElement boatBoard (2,2) 'o'), [testBoat], False)
 
-    testCheckHitBoat :: Assertion
+    test_CheckHitBoat :: Assertion
     testCheckHitBoat = do
         let b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
         let b2 = Boat [(10,10),(9,9),(8,8)] [False, True, False]
@@ -24,7 +24,7 @@ module ShotTest where
         assertEqual (checkHitBoat (2,2) b1) ([(1,1),(1,2),(1,3)] [False, False, False])
 
 
-    testCheckHitBoats :: Assertion
+    test_CheckHitBoats :: Assertion
     testCheckHitBoats = do
         let b1 = Boat [(1,1),(1,2),(1,3)] [False, False, False]
         let b2 = Boat [(10,10),(9,9),(8,8)] [False, True, False]
