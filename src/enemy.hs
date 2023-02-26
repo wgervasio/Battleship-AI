@@ -11,7 +11,6 @@ module Enemy where
     whiteSquares :: [(Integer, Integer)]
     whiteSquares = [(x,y) | x <- [1,3..10], y <- [1,3..10]] ++ [(x,y) | x <- [2,4..10], y <- [2,4..10]]
     -- if there are no shots adjacent to a hit ship, we pick a random square with parity of 2
-    -- pickShot :: Board -> IO (Integer, Integer)
 
     pickShot :: IO (Integer, Integer)
     pickShot = do

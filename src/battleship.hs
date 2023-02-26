@@ -16,118 +16,130 @@ type Player = State -> Action
 
 import ShipData
 import Shot
-import Setup
 import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
 
 delaySecs = 0 * 1000000
+
+data GameState = GameState {
+    player :: Player,
+    playerList :: [Boat],
+    enemyList :: [Boat],
+    playerBoard :: Board,
+    enemyBoard :: Board,
+    aiShots :: [(Integer, Integer)]
+} deriving (Show)
+
+data Player = User | AI deriving (Show)
+
+
+
+takeTurn :: GameState -> IO GameState
+takeTurn gs =
+   case player gs of 
+      User -> do   
+            (newElist, newEboard, _) <- playerTurn (enemyList gs) (enemyBoard gs)
+            return GameState { player = AI, playerList = (playerList gs), enemyList = newElist, playerBoard = (playerBoard gs), enemyBoard = newEboard, aiShots = (aiShots gs) }
+      AI -> do 
+            (newPlist, newPboard, newTargets) <- enemyTurn (playerList gs) (playerBoard gs) (aiShots gs) 
+            return GameState { player = User, playerList = newPlist, enemyList = (enemyList gs), playerBoard = newPboard, enemyBoard = (enemyBoard gs), aiShots = newTargets }
+
+
+isGameOver :: GameState -> Bool
+isGameOver gs = gameWon (playerList gs) || gameWon (enemyList gs)
+
+
+
+
+
 -- places all 5 boats on the board
 -- places the enemy boats randomly
 -- plays the first turn for the player
 
+setupGame = do
+   enemyBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
+   playerBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
+   return GameState { 
+      player = User,
+      playerList = playerBoats, 
+      enemyList = enemyBoats, 
+      playerBoard = (addBoatsToBoard playerBoats), 
+      enemyBoard = (addBoatsToBoard enemyBoats), 
+      aiShots = []
+   }
+
+
+startGame :: IO ()
 startGame=do
+   initialGame <- setupGame
+   gameLoop initialGame
 
-   enemyList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   -- place your 5 boats
-   playerList <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   -- call player turn
-   let pboard =  addBoatsToBoard playerList
-   let eboard = addBoatsToBoard enemyList
-   playerTurn playerList enemyList pboard eboard []
+
+gameLoop gs = do
+   if isGameOver gs then
+      return ()
+   else do
+      newState <- takeTurn gs
+      gameLoop newState
+
+
+turn :: [Boat] -> Board -> [Char] -> [Char] -> IO ([Boat], Board, [(Integer, Integer)]) -> IO ([Boat], Board, [(Integer, Integer)])
+turn lst board player1 player2 shotLambda= do
+   let line = replicate 30 '='
+   putStrLn line
+   putStrLn ("\n\n\n" ++ player1 ++ " turn. "++ player2 ++ " board:\n\n\n")
+   printBoard(board)
+
+   (newList, newBoard, newTargets) <- shotLambda
+
+   putStrLn ("\n\n\n" ++ player2 ++ "'s board after shot:\n\n\n")
+   printBoard(newBoard)
+   threadDelay delaySecs
+
+   if (gameWon newList) then do
+      putStrLn ("\n\n\n" ++ player1 ++ " wins!\n\n\n")
+      return (newList, newBoard, newTargets)
+   else do
+      putStrLn ("\n\n\n" ++ player1 ++ " turn over!\n\n\n")
+      return (newList, newBoard, newTargets)
+
    
-
+   
 
 -- prompts user for shot
 -- checks if shot is valid
 -- checks if shot hits a boat
 -- checks if all enemy boats are sunk
    
-playerTurn :: [Boat] -> [Boat] -> Board -> Board -> [(Integer, Integer)]-> IO ()
-playerTurn plist elist pboard eboard targets = do
---    -- print enemy board
---    -- TODO change this
-   putStrLn "\n\n\nYour turn. Enemy board:\n\n\n"
-   printBoard(eboard)
-  
-
-   -- print (elist) -- for debugging and quick aim bot
-   -- print (targets) -- for debugging
-   coords <- getValidShot eboard promptShot
-
-   let (newElist, newEboard, _) = checkShot coords elist eboard
-
-   -- print enemy board after shot
-   threadDelay delaySecs
-   putStrLn "\n\n\nEnemy board after shot:\n\n\n"
-   printBoard(newEboard)
-   threadDelay delaySecs
-
-   if gameWon newElist then
-      putStrLn "You won!"
-   else
-      enemyTurn plist newElist pboard newEboard targets
+playerTurn :: [Boat] -> Board -> IO ([Boat], Board, [(Integer, Integer)])
+playerTurn elist eboard = do
+   turn elist eboard "Player" "Enemy" playerShot where
+      playerShot = do
+         coords <- getValidShot eboard promptShot
+         let (newElist, newEboard, _) = checkShot coords elist eboard
+         return (newElist, newEboard, [])
 
 
 
-enemyTurn :: [Boat] -> [Boat] -> Board -> Board -> [(Integer, Integer)]-> IO ()
-enemyTurn plist elist pboard eboard [] = do
-   -- print player board
-   -- TODO: fix this
-   putStrLn"THE EMPTY LIST"
-   putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
-   printBoard(pboard)
+enemyTurn :: [Boat] -> Board -> [(Integer,Integer)] -> IO ([Boat], Board, [(Integer, Integer)])
+enemyTurn plist pboard [] = do
+
+   turn plist pboard "Enemy" "Player" enemyShot where
+      enemyShot = do
+         coords <- getValidShot pboard pickShot
+         let (newPlist, newPboard, hit) = checkShot coords plist pboard 
+         let newTargets = if hit then addAdjacent [] coords newPboard else []
+         return (newPlist, newPboard, newTargets)
 
 
-   coords <- getValidShot pboard pickShot
-
-
-   -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
-   let (newPlist, newPboard, hit) = checkShot coords plist pboard 
-
-   -- putStrLn "Enemy fired!"
-   let newTargets = if hit then addAdjacent [] coords newPboard else []
-   -- print newTargets
-
-   threadDelay delaySecs
-   putStrLn "\n\n\nPlayer board after shot:\n\n\n"
-   printBoard(newPboard)
-   print(newPlist) -- for debugging
-   threadDelay delaySecs
-
-   if gameWon newPlist then
-      putStrLn "Enemy won!"
-   else
-      playerTurn newPlist elist newPboard eboard newTargets
-
-enemyTurn plist elist pboard eboard (target:targets) = do
-   -- print player board
-   -- TODO: fix this
-   putStrLn "THE NON EMPTY LIST"
-   putStrLn "\n\n\nEnemy turn. Player board:\n\n\n"
-   printBoard(pboard)
-
-   coords <- pure target
-
-   if shotAlready pboard coords then do
-      enemyTurn plist elist pboard eboard targets
-   else do
-      let (newPlist, newPboard, hit) = checkShot coords plist pboard 
-      let newTargets = if hit then addAdjacent targets coords newPboard else targets
-
-      threadDelay delaySecs
-      putStrLn "\n\n\nPlayer board after shot:\n\n\n"
-      printBoard(newPboard)
-      -- print(newPlist) -- for debugging
-      threadDelay delaySecs
-
-      if gameWon newPlist then
-         putStrLn "Enemy won!"
-      else
-            playerTurn newPlist elist newPboard eboard newTargets
-      
-   -- putStrLn "The enemy shoots at row " ++ show x ++ ", column " ++ show y
+enemyTurn plist pboard (coords:targets) = do
+   turn plist pboard "Enemy" "Player" enemyShot where
+      enemyShot = do
+         let (newPlist, newPboard, hit) = checkShot coords plist pboard
+         let newTargets = if hit then addAdjacent targets coords newPboard else targets
+         return (newPlist, newPboard, newTargets)
    
    
 
@@ -147,34 +159,11 @@ checkOverlaps b1 b2 =
          b1coords = positions b1 
          b2coords = positions b2
 
--- b0 = Boat [] []
--- b1 = Boat [(1,1), (1,2), (1,3)] [False, False, False]
--- b2 = Boat [(1,1), (1,2), (1,3)] [False, True, False]
--- b3 = Boat [(1,1), (4,4), (5,5)] [False, False, False]
--- b4 = Boat [(2,2), (4,4), (7,7)] [True, False, False]
--- b5 = Boat [(3,3), (5,5), (7,7)] [False, False, True]
--- checkOverlaps b1 b2 -> true
--- checkOverlaps b2 b3 -> true
--- checkOverlaps b3 b4 -> true
--- checkOverlaps b4 b5 -> true
--- checkOverlaps b5 b1 -> false
--- checkOverlaps b4 b2 -> false 
--- checkOverlaps b0 b1 -> false
 
 checkOverlapsList :: Boat -> [Boat] -> Bool
 -- check if single boat has overlap with any boat in list
 checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
--- lob1 = []
--- lob2 = [b2, b3, b4, b5]
--- lob3 = [b3]
--- lob4 = [b1, b5]
-
--- checkOverlapsList b1 lob1 -> false
--- checkOverlapsList b1 lob2 -> true
--- checkOverlapsList b1 lob3 -> true
--- checkOverlapsList b0  lob4 -> false
--- checkOverlapsList (Boat [(10,10), (9,9)] [True, False])  lob4 -> false
 
 
 
