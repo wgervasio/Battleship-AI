@@ -20,7 +20,6 @@ import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
-import qualified GHC.TypeLits
 
 delaySecs = 0 * 1000000
 
