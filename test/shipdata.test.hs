@@ -8,6 +8,7 @@ module ShipDataTest where
     testBoard = (Board (array ((1,1),(2,2) [((i,j), '_') | i <- [1..2], j <- [1..2]])))
 
     testEmptyBoard :: Assertion
+    -- test properly creates an empty board
     testEmptyBoard = assertEquals emptyBoard (Board (array ((1,1),(10,10)) [((i,j), '_') | i <- [1..10], j <- [1..10]]))
 
     testGetBoardElement :: Assertion

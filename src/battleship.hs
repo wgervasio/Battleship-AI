@@ -70,7 +70,8 @@ setupGame = do
       aiShots = []
    }
 
-
+-- function to start game. player places 5 boats manually, enemy places 5 randomly.
+-- board is created and player starts
 startGame :: IO ()
 startGame=do
    initialGame <- setupGame
@@ -108,11 +109,10 @@ turn lst board player1 player2 shotLambda= do
    
    
 
--- prompts user for shot
--- checks if shot is valid
--- checks if shot hits a boat
--- checks if all enemy boats are sunk
-   
+-- function to handle player's turn at the game
+-- takes inputs reflecting the player and enemy's boat lists, and the player and enemy's boards
+-- also takes a list of the enemy's targets to be used on the next enemy turn
+
 playerTurn :: [Boat] -> Board -> IO ([Boat], Board, [(Integer, Integer)])
 playerTurn elist eboard = do
    turn elist eboard "Player" "Enemy" playerShot where
@@ -123,9 +123,15 @@ playerTurn elist eboard = do
 
 
 
-enemyTurn :: [Boat] -> Board -> [(Integer,Integer)] -> IO ([Boat], Board, [(Integer, Integer)])
-enemyTurn plist pboard [] = do
 
+-- function to handle enemy turn. takes the player and enemy boat lists, player and enemy boards
+-- and a list of cells to target if applicable
+-- enemy behaviour has two simple modes: if there are no cells to target, it will fire on a random cell with parity of 2
+-- if it has valid targets, it will fire on those until exhausting them
+-- if a shot is a hit, all adjacent valid spaces will be added to the targets list 
+
+enemyTurn :: [Boat] -> Board -> [(Integer, Integer)] -> IO ([Boat], Board, [(Integer, Integer)])
+enemyTurn plist pboard [] = do
    turn plist pboard "Enemy" "Player" enemyShot where
       enemyShot = do
          coords <- getValidShot pboard pickShot
@@ -167,7 +173,7 @@ checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
 
 
-
+-- prompt the player to place their boats on the board via input-output
 placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
    putStrLn("You are now placing your boat of size " ++ show n ++ ".")
@@ -199,13 +205,14 @@ placeBoat n lst = do
       else 
          return (boat:unMonadLst)
 
+-- place a random boat onto the board. used for creating enemy boat positions
 placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
 placeBoatRandom n lst = do
-  -- random orientation/direction
+  -- create a random boat oriented either horizontally or vertically
   dir::Integer <- randomRIO (1, 2)
   let dirStr = if dir `mod` 2 == 0 then "H" else "V"
 
-  -- random pointing
+  -- given a horizontal boat, point it either left or right. given a vertical boat, point it either up or down
   let (op1,op2) = if dirStr == "H" then ("L", "R") else ("U", "D")
   pointing::Integer <- randomRIO (1, 2)
   let pointingStr = if pointing `mod` 2 == 0 then op1 else op2
@@ -213,6 +220,7 @@ placeBoatRandom n lst = do
   unMonadLst <- lst
   placeBoatRandomHelper n unMonadLst dirStr pointingStr
 
+-- provide length of a board given it's length, starting x and y, direction and pointing
 grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, Integer)]
 grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]
@@ -220,7 +228,8 @@ grabLengths n start_x start_y dir pointing
       | dir == "V" && pointing == "U" = [(start_x, i) | i <- [start_y..(start_y+n)]]
       | dir == "V" && pointing == "D" = [(start_x, i) | i <- [(start_y - n)..start_y]]
 
-
+-- generate a random boat of n length, facing in dir direction(H for horizontal or V for vertical)
+-- pointing in pointing direction(R, L, U, D)
 placeBoatRandomHelper :: Integer -> [Boat] -> String -> String -> IO [Boat]
 placeBoatRandomHelper n lst dir pointing = do
 
@@ -229,10 +238,12 @@ placeBoatRandomHelper n lst dir pointing = do
 
    let coords = grabLengths (n - 1) start_x start_y dir pointing
    if not $ all checkBounds coords then
+      -- if boat is out of bounds then repeat
       placeBoatRandomHelper n lst dir pointing
    else
       let boat = Boat coords (replicate (fromInteger n) False)  in 
       if checkOverlapsList boat lst then
+         -- if boat overlaps with other enemy boats then repeat
          placeBoatRandomHelper n lst dir pointing
       else 
          return (boat:lst)

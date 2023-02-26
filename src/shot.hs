@@ -4,8 +4,9 @@ module Shot where
     import Text.Read(readMaybe)
 
 
-    -- same behaviour as checkShot
-    -- but returns hit bool to adjust target space
+    -- check through the entire boat list to see if the shot hits any
+    -- handles any updates needed to the boat and board 
+    -- returns the boat, board, and boolean value reflecting whether the shot was a hit
     checkShot :: (Integer, Integer) -> [Boat] -> Board -> ([Boat], Board, Bool)
     checkShot _ [] board = ([], board, False)
     checkShot coords boats board =
@@ -15,12 +16,10 @@ module Shot where
             else
                 (boats, (updateBoardElement board coords 'o'), hit)
             
-
-    
-    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     -- find tuple in boat that matches (x,y)
     -- if found, change bool to True
     -- return updated boat and bool if hit
+    checkHitBoat :: (Integer, Integer) -> Boat -> Boat
     checkHitBoat _ (Boat [] []) = (Boat [] []) 
     checkHitBoat _ (Boat [] lst) = (Boat [] lst) 
     checkHitBoat _ (Boat lst []) = (Boat lst []) 
@@ -31,7 +30,8 @@ module Shot where
             let (Boat _ updatedHitRest) = checkHitBoat shotCoords (Boat xyRest hitRest)
             in Boat (coords:xyRest) (hitI:updatedHitRest)
 
-
+    -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
+    -- was hit or not, modifying the boat in the list of needed
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
     checkHitBoats shotCoords (headBoat:restBoats) = 
@@ -69,6 +69,7 @@ module Shot where
     validCoords :: Board -> (Integer, Integer) -> Bool
     validCoords board coords =  (checkBounds coords && (not (shotAlready board coords)))
 
+    -- repeatedly prompt the player until they provide an input that doesn't hit a cell they previously fired on
     getValidShot :: Board -> IO (Integer, Integer) -> IO (Integer, Integer)
     getValidShot board coordLambda = do
         potentialCoords <- coordLambda
