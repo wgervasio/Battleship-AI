@@ -13,10 +13,10 @@ module EnemyTest where
     updatedBoard2_1 = testBoard2 // [((4, 4), '_')]
     updatedBoard2_2 = testBoard2_1 // [((9, 9), '_')]
 
-    testPickShotOneLeft :: Assertion
+    test_PickShotOneLeft :: Assertion
     testPickShotOneLeft = assertEquals getBoardElement (pickShot updatedBoard1) "_"
         assertEquals (pickShot updatedBoard1) (10,10)
 
-    testPickShotTwoLeft :: Assertion
+    test_PickShotTwoLeft :: Assertion
     testPickShotTwoLeft = assertEquals getBoardElement (pickShot updatedBoard2_2) "_"
         assertEquals (pickShot updatedBoard2_2) (4,4)

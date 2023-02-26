@@ -20,6 +20,7 @@ import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
+import qualified GHC.TypeLits
 
 delaySecs = 0 * 1000000
 
@@ -174,6 +175,7 @@ checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
 
 -- prompt the player to place their boats on the board via input-output
+-- prompt the player to place their boats on the board via input-output
 placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
    putStrLn("You are now placing your boat of size " ++ show n ++ ".")
@@ -220,7 +222,7 @@ placeBoatRandom n lst = do
   unMonadLst <- lst
   placeBoatRandomHelper n unMonadLst dirStr pointingStr
 
--- provide length of a board given it's length, starting x and y, direction and pointing
+-- provide a list of coordinates reflecting a boat's position given positional data 
 grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, Integer)]
 grabLengths n start_x start_y dir pointing
       | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]

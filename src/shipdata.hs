@@ -3,6 +3,7 @@ module ShipData where
     import Data.Array ( Array, (!), (//), listArray, array )
     import Data.List
     import Data.Foldable
+    import qualified GHC.TypeLits as cheat
     
     -- a data type representing a boat. each boat has an array of (Integer, Integer) pairs representing each cell it occupies on the board
     -- and a list of corresponding booleans representing if the given cell has been hit.
