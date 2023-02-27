@@ -60,8 +60,14 @@ isGameOver gs = gameWon (playerList gs) || gameWon (enemyList gs)
 -- plays the first turn for the player
 
 setupGame = do
+   -- hacky fix because using foldl made error handling very difficult
+   playerBoats <- placeBoat 5 (return [])
+   playerBoats <- placeBoat 4 (return playerBoats)
+   playerBoats <- placeBoat 3 (return playerBoats)
+   playerBoats <- placeBoat 3 (return playerBoats)
+   playerBoats <- placeBoat 2 (return playerBoats)
+
    enemyBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   playerBoats <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
    return GameState { 
       player = User,
       playerList = playerBoats, 
