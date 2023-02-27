@@ -150,8 +150,9 @@ enemyTurn plist pboard [] = do
 enemyTurn plist pboard (coords:targets) = do
    turn plist pboard "Enemy" "Player" enemyShot where
       enemyShot = do
-         let (newPlist, newPboard, hit) = checkShot coords plist pboard
-         let newTargets = if hit then addAdjacent targets coords newPboard else targets
+         (x, y) <- if null targets then pickShot else pickAdjacentCoordinate (coords:targets) coords pboard
+         let (newPlist, newPboard, hit) = checkShot (x,y) plist pboard
+         let newTargets = if hit then addAdjacent targets (x,y) newPboard else targets
          return (newPlist, newPboard, newTargets)
    
    
