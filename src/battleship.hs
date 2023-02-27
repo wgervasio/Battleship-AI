@@ -20,6 +20,7 @@ import Enemy
 import System.Random
 import System.IO
 import Control.Concurrent (threadDelay)
+import Text.Read
 
 delaySecs = 0 * 1000000
 
@@ -60,7 +61,7 @@ isGameOver gs = gameWon (playerList gs) || gameWon (enemyList gs)
 
 setupGame = do
    enemyBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
-   playerBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
+   playerBoats <- foldl (\acc x -> placeBoat x acc) (return []) [2,3,3,4,5]
    return GameState { 
       player = User,
       playerList = playerBoats, 
@@ -91,7 +92,7 @@ turn lst board player1 player2 shotLambda= do
    let line = replicate 30 '='
    putStrLn line
    putStrLn ("\n\n\n" ++ player1 ++ " turn. "++ player2 ++ " board:\n\n\n")
-   printBoard(board)
+   if player1 == "Player" then printBoardEnemy board else printBoard board
 
    (newList, newBoard, newTargets) <- shotLambda
 
@@ -129,7 +130,7 @@ playerTurn elist eboard = do
 -- enemy behaviour has two simple modes: if there are no cells to target, it will fire on a random cell with parity of 2
 -- if it has valid targets, it will fire on those until exhausting them
 -- if a shot is a hit, all adjacent valid spaces will be added to the targets list 
-
+-- enemy behaviour inspired by this blog post: http://www.datagenetics.com/blog/december32011/
 enemyTurn :: [Boat] -> Board -> [(Integer, Integer)] -> IO ([Boat], Board, [(Integer, Integer)])
 enemyTurn plist pboard [] = do
    turn plist pboard "Enemy" "Player" enemyShot where
@@ -179,32 +180,54 @@ placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
    putStrLn("You are now placing your boat of size " ++ show n ++ ".")
    putStrLn "Do you want your boat to be horizontal or vertical? Type H or V"
-   dir <- getLine
-
+   dir <- checkInput (`elem` ["H","V"]) "Invalid direction. Please try again."
+   
+   let points = []
    if dir == "V" then
-      putStrLn "Do you want your boat to point up or down? Type U or D"
+      putStrLn "Do you want your boat's tail to point up or down? Type U or D"
    else
-      putStrLn "Do you want your boat to point left or right? Type L or R"
-   pointing <- getLine
+      putStrLn "Do you want your boat's tail to point left or right? Type L or R"
+   let validPoints = if dir == "H" then ["L","R"] else ["U","D"]
+   pointing <- checkInput(`elem` validPoints) "Invalid direction. Please try again."
 
+   coordsHelper lst n dir pointing
+
+coordsHelper :: IO [Boat] -> Integer -> String -> String -> IO [Boat]
+coordsHelper lst n dir pointing= do
    putStrLn "What row is your boat on?"
-   headRow <- readLn :: IO Integer
+   headRow <- getInt
    putStrLn "What column do you want the head of your boat to be at?"
-   headCol <- readLn :: IO Integer
-
-   let coords = grabLengths n headCol headRow dir pointing
-
+   headCol <- getInt
+   let coords = grabLengths (n - 1) headCol headRow dir pointing
+   let boat = Boat coords (replicate (fromInteger n) False) 
+   unmonadLst <- lst
    if not $ all checkBounds coords then do
       putStrLn "Invalid coordinates. Please try again."
-      placeBoat n lst
-   else do
-      unMonadLst <- lst
-      let boat = Boat coords (replicate (fromInteger n) False) 
-      if checkOverlapsList boat unMonadLst then do
-         putStrLn "This overlaps another boat. Please try again."
-         placeBoat n lst
+      coordsHelper lst n dir pointing
+   else if checkOverlapsList boat unmonadLst then do
+         putStrLn ("This overlaps another boat. Please try again. You are trying to place a boat of size " ++ show n)
+         coordsHelper lst n dir pointing
       else 
-         return (boat:unMonadLst)
+         return (boat:unmonadLst)
+
+
+
+checkInput :: (String -> Bool) -> String -> IO String
+checkInput f msg =do
+    input <- getLine
+    if f input then 
+      pure input
+    else do
+      putStrLn msg 
+      checkInput f msg
+
+getInt :: IO Integer
+getInt = do
+   putStrLn("Please input a valid integer.")
+   input <- getLine
+   case readMaybe input :: Maybe Integer of
+      Just number -> pure number
+      Nothing -> getInt
 
 -- place a random boat onto the board. used for creating enemy boat positions
 placeBoatRandom :: Integer -> IO [Boat] -> IO [Boat]
@@ -224,10 +247,10 @@ placeBoatRandom n lst = do
 -- provide a list of coordinates reflecting a boat's position given positional data 
 grabLengths :: Integer -> Integer -> Integer -> String -> String -> [(Integer, Integer)]
 grabLengths n start_x start_y dir pointing
-      | dir == "H" && pointing == "R" = [(i, start_y) | i <- [(start_x-n)..start_x]]
-      | dir == "H" && pointing == "L" = [(i, start_y) | i <- [start_x..(start_x+n)]]
-      | dir == "V" && pointing == "U" = [(start_x, i) | i <- [start_y..(start_y+n)]]
-      | dir == "V" && pointing == "D" = [(start_x, i) | i <- [(start_y - n)..start_y]]
+      | dir == "H" && pointing == "L" = [(i, start_y) | i <- [(start_x-n)..start_x]]
+      | dir == "H" && pointing == "R" = [(i, start_y) | i <- [start_x..(start_x+n)]]
+      | dir == "V" && pointing == "D" = [(start_x, i) | i <- [start_y..(start_y+n)]]
+      | dir == "V" && pointing == "U" = [(start_x, i) | i <- [(start_y - n)..start_y]]
 
 -- generate a random boat of n length, facing in dir direction(H for horizontal or V for vertical)
 -- pointing in pointing direction(R, L, U, D)
