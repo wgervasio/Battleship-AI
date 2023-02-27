@@ -27,38 +27,21 @@ module Shot where
         if shotCoords == coords then
             (Boat (coords:xyRest) (True:hitRest))
         else 
-<<<<<<< HEAD
             let (Boat _ updatedHitRest) = checkHitBoat shotCoords (Boat xyRest hitRest)
             in Boat (coords:xyRest) (hitI:updatedHitRest)
 
     -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
     -- was hit or not, modifying the boat in the list of needed
-=======
-            let (Boat _ updatedHitRest) = checkHitBoat (xShot,yShot) (Boat xyRest hitRest)
-            in Boat ((xi,yi):xyRest) (hitI:updatedHitRest)
-
-    -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
-    -- was hit or not, modifying the boat in the list of neede
->>>>>>> main
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
     checkHitBoats shotCoords (headBoat:restBoats) = 
         -- does not work if point was already hit
         let updatedBoat = checkHitBoat shotCoords headBoat in
         if headBoat /= updatedBoat then
-<<<<<<< HEAD
             (updatedBoat:restBoats, True)
         else
             let (updatedBoats, restHit) = checkHitBoats shotCoords restBoats in
                 (headBoat:updatedBoats, restHit)
-=======
-            -- if head /= updated, we know updated was hit and can keep recursing
-            (updatedBoat:restBoats, True) :: ([Boat], Bool)
-        else
-            -- keep recursing
-            let (updatedBoats, restHit::Bool) = checkHitBoats (xShot,yShot) restBoats in
-                (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
->>>>>>> main
 
     -- prompts user for row and col position of shot
     -- checks if shot is valid
