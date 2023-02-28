@@ -31,19 +31,17 @@ module Shot where
             in Boat (coords:xyRest) (hitI:updatedHitRest)
 
     -- recurse through a list of boats to see if one got hit by the shot. returns the boat and a bool representing whether a boat
-    -- was hit or not, modifying the boat in the list of neede
+    -- was hit or not, modifying the boat in the list of needed
     checkHitBoats :: (Integer, Integer) -> [Boat] -> ([Boat], Bool)
     checkHitBoats _ [] = ([], False)
     checkHitBoats shotCoords (headBoat:restBoats) = 
         -- does not work if point was already hit
         let updatedBoat = checkHitBoat shotCoords headBoat in
         if headBoat /= updatedBoat then
-            -- if head /= updated, we know updated was hit and can keep recursing
-            (updatedBoat:restBoats, True) :: ([Boat], Bool)
+            (updatedBoat:restBoats, True)
         else
-            -- keep recursing
-            let (updatedBoats, restHit::Bool) = checkHitBoats shotCoords restBoats in
-                (headBoat:updatedBoats, restHit) :: ([Boat], Bool)
+            let (updatedBoats, restHit) = checkHitBoats shotCoords restBoats in
+                (headBoat:updatedBoats, restHit)
 
     -- prompts user for row and col position of shot
     -- checks if shot is valid

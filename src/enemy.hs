@@ -26,4 +26,14 @@ module Enemy where
     addAdjacent shots (x,y) board = filter (validCoords board) [(x+1,y), (x-1,y), (x,y+1), (x,y-1)] ++ shots
 
     
-    
+    -- Given a list of guessed coordinates and a previous hit coordinate,
+    -- pick a new coordinate to guess that is adjacent to the previous hit.
+    -- If there are no adjacent coordinates available, pick a random coordinate.
+    pickAdjacentCoordinate :: [(Integer, Integer)] -> (Integer, Integer) -> Board -> IO (Integer,Integer)
+    pickAdjacentCoordinate shots (x, y) board = do
+        let adjacentCoords = filter (\(x', y') -> abs (x' - x) + abs (y' - y) == 1) [(x, y) | x <- [1..10], y <- [1..10]]
+        let adjacentFiltered = filter (validCoords board) adjacentCoords
+        let availableCoords = filter (\coord -> not $ elem coord shots) adjacentFiltered
+        if null availableCoords
+            then pickShot >>= return
+            else return $ head availableCoords

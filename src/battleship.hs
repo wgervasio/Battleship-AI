@@ -62,10 +62,15 @@ isGameOver gs = gameWon (playerList gs) || gameWon (enemyList gs)
 setupGame = do
    -- hacky fix because using foldl made error handling very difficult
    playerBoats <- placeBoat 5 (return [])
+   printBoard (addBoatsToBoard playerBoats)
    playerBoats <- placeBoat 4 (return playerBoats)
+   printBoard (addBoatsToBoard playerBoats)
    playerBoats <- placeBoat 3 (return playerBoats)
+   printBoard (addBoatsToBoard playerBoats)
    playerBoats <- placeBoat 3 (return playerBoats)
+   printBoard (addBoatsToBoard playerBoats)
    playerBoats <- placeBoat 2 (return playerBoats)
+   printBoard (addBoatsToBoard playerBoats)
 
    enemyBoats <- foldl (\acc x -> placeBoatRandom x acc) (return []) [2,3,3,4,5]
    return GameState { 
@@ -150,8 +155,9 @@ enemyTurn plist pboard [] = do
 enemyTurn plist pboard (coords:targets) = do
    turn plist pboard "Enemy" "Player" enemyShot where
       enemyShot = do
-         let (newPlist, newPboard, hit) = checkShot coords plist pboard
-         let newTargets = if hit then addAdjacent targets coords newPboard else targets
+         (x, y) <- if null coords then pickShot else return coords
+         let (newPlist, newPboard, hit) = checkShot (x,y) plist pboard
+         let newTargets = if hit then addAdjacent targets (x,y) newPboard else targets
          return (newPlist, newPboard, newTargets)
    
    
