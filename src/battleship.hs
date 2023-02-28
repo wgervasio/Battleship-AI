@@ -235,7 +235,7 @@ checkInput f msg =do
 
 getInt :: IO Integer
 getInt = do
-   putStrLn("Please input a valid integer.")
+   putStrLn("Please input a valid integer between 1 and 10.")
    input <- getLine
    case readMaybe input :: Maybe Integer of
       Just number -> pure number
