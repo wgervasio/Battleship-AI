@@ -1,18 +1,6 @@
 -- Battleship in Haskell
 {-# LANGUAGE BlockArguments #-}
 module BattleShip where
-{-
-data State = State InternalState [Action]  -- internal_state available_actions
-         deriving (Ord, Eq, Show)
-
-data Result = EndOfGame Double State    -- end of game: value, starting state
-            | ContinueGame State        -- continue with new state
-         deriving (Eq, Show)
-
-type Game = Action -> State -> Result
-
-type Player = State -> Action
--}
 
 import ShipData
 import Shot
@@ -24,6 +12,8 @@ import Text.Read
 
 delaySecs = 0 * 1000000
 
+-- a datatype representing the state of the game at a given time
+-- contains the boards and boat lists of both players, and a list of valid spaces adjacent to the AI's previous hits 
 data GameState = GameState {
     player :: Player,
     playerList :: [Boat],
@@ -36,7 +26,7 @@ data GameState = GameState {
 data Player = User | AI deriving (Show)
 
 
-
+-- proceeds through player turns by taking in a gamestate as an input
 takeTurn :: GameState -> IO GameState
 takeTurn gs =
    case player gs of 
@@ -89,7 +79,7 @@ startGame=do
    initialGame <- setupGame
    gameLoop initialGame
 
-
+-- loop to play through the game
 gameLoop gs = do
    if isGameOver gs then
       return ()
@@ -97,12 +87,16 @@ gameLoop gs = do
       newState <- takeTurn gs
       gameLoop newState
 
+-- function for processing each turn. takes a lambda function for determining each shot. on a player's turn, their shot will be
+-- prompted through the console. on the enemy's turn, their shot will be determined according to the algorithm
+-- defined elsewhere in this file.
 
 turn :: [Boat] -> Board -> [Char] -> [Char] -> IO ([Boat], Board, [(Integer, Integer)]) -> IO ([Boat], Board, [(Integer, Integer)])
 turn lst board player1 player2 shotLambda= do
    let line = replicate 30 '='
    putStrLn line
    putStrLn ("\n\n\n" ++ player1 ++ " turn. "++ player2 ++ " board:\n\n\n")
+   -- use printBoardEnemy so the player can't see their enemy's boats 
    if player1 == "Player" then printBoardEnemy board else printBoard board
 
    (newList, newBoard, newTargets) <- shotLambda
@@ -143,6 +137,7 @@ playerTurn elist eboard = do
 -- if a shot is a hit, all adjacent valid spaces will be added to the targets list 
 -- enemy behaviour inspired by this blog post: http://www.datagenetics.com/blog/december32011/
 enemyTurn :: [Boat] -> Board -> [(Integer, Integer)] -> IO ([Boat], Board, [(Integer, Integer)])
+-- case with no valid targets
 enemyTurn plist pboard [] = do
    turn plist pboard "Enemy" "Player" enemyShot where
       enemyShot = do
@@ -151,7 +146,7 @@ enemyTurn plist pboard [] = do
          let newTargets = if hit then addAdjacent [] coords newPboard else []
          return (newPlist, newPboard, newTargets)
 
-
+-- case with some valid targets left
 enemyTurn plist pboard (coords:targets) = do
    turn plist pboard "Enemy" "Player" enemyShot where
       enemyShot = do
@@ -186,7 +181,6 @@ checkOverlapsList boat lst =  any (checkOverlaps boat) lst
 
 
 
--- prompt the player to place their boats on the board via input-output
 -- prompt the player to place their boats on the board via input-output
 placeBoat :: Integer -> IO [Boat] -> IO [Boat]
 placeBoat n lst = do
@@ -223,7 +217,8 @@ coordsHelper lst n dir pointing= do
          return (boat:unmonadLst)
 
 
-
+-- gets an IO input and checks if it is valid with f
+-- if the input is invalid, output msg and call itself again until a valid input is received
 checkInput :: (String -> Bool) -> String -> IO String
 checkInput f msg =do
     input <- getLine
@@ -233,6 +228,7 @@ checkInput f msg =do
       putStrLn msg 
       checkInput f msg
 
+-- io input function that calls itself until receiving a valid integer input
 getInt :: IO Integer
 getInt = do
    putStrLn("Please input a valid integer between 1 and 10.")
